@@ -1,0 +1,16 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Clan {
+  id           Int      @id @default(autoincrement())
+  guildID      String   @unique
+  name         String
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
