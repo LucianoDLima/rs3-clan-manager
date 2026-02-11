@@ -17,10 +17,10 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "@prisma/client": "^7.3.0",
+    "@prisma/client": "^6.19.2",
     "discord.js": "^14.25.1",
     "express": "^5.2.1",
-    "prisma": "^7.3.0",
+    "prisma": "^6.19.2",
     "typescript": "^5.9.3"
   },
   "devDependencies": {
