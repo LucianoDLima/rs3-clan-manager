@@ -9,7 +9,7 @@ export async function handleSetupClan(interaction: ChatInputCommandInteraction) 
   const isAdmin = await verifyAdminPermissions(interaction);
   if (!isAdmin) return;
 
-  await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+  await interaction.deferReply();
 
   const guildId = interaction.guildId;
   if (!guildId) {
@@ -25,9 +25,9 @@ export async function handleSetupClan(interaction: ChatInputCommandInteraction) 
             .setDescription(
               [
                 `This server is already set up with the clan: **${existingClan.name}**.`,
-                '\n',
                 'If the clan name is incorrect, it will not be able to pull data from the runemetrics.',
-                // TODO: Add instructions on how to change the clan name if it's incorrect. I still need to implement it though.
+                '- You can change the clan name with the `/config rename` command.',
+                'Note that changing the clan name should only be done if you changed the clan name in-game and the current name is no longer correct, otherwise you might break the connection to runemetrics and it will stop pulling data.',
               ].join('\n'),
             )
             .setColor(embedCons.color.INFO),
