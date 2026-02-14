@@ -1,5 +1,6 @@
 import { ChatInputCommandInteraction } from 'discord.js';
 import { handleSetupClan } from '../../services/setupClan';
+import { handleSyncMembers } from '../../handlers/handleSyncMembers';
 
 export async function handleChatInputCommand(
   interaction: ChatInputCommandInteraction,
@@ -9,6 +10,14 @@ export async function handleChatInputCommand(
 
     if (subcommand === 'create') {
       await handleSetupClan(interaction);
+    }
+
+    if (subcommand === 'rename') {
+      await interaction.reply('To be implemented');
+    }
+
+    if (subcommand === 'sync') {
+      await handleSyncMembers(interaction);
     }
   }
 }

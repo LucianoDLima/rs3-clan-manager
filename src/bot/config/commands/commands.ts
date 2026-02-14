@@ -30,5 +30,12 @@ export const commandList = [
             )
             .setRequired(true),
         ),
+    )
+    .addSubcommand((subcommand) =>
+      subcommand
+        .setName('sync')
+        .setDescription(
+          'Sync clan members with runemetrics. This does not remove members.',
+        ),
     ),
 ];

@@ -28,6 +28,8 @@ model Member {
   currentExp           BigInt    @default(0)
   lastExpUpdate        DateTime?
 
+  lastActivity         DateTime?
+
   lastSeen             DateTime  @default(now())
   isActive             Boolean   @default(true)
   leftDate             DateTime?
@@ -36,11 +38,11 @@ model Member {
   banReason            String?
   banDate              DateTime?
 
-  clanId    Int
-  clan      Clan       @relation(fields: [clanId], references: [id])
+  clanId               Int
+  clan                 Clan      @relation(fields: [clanId], references: [id])
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
 
   @@unique([name, clanId])
 }
