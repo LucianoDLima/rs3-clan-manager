@@ -1,60 +1,29 @@
-import { ChatInputCommandInteraction } from 'discord.js';
-import { verifyAdminPermissions } from '../middleware/guard';
 import { createClan } from '../database/clan/createClan';
 import { findClan } from '../database/clan/findClan';
-import {
-  embedClanAlreadyConfigured,
-  embedClanSetupError,
-  embedClanSetupSuccess,
-} from '../bot/embeds/setupEmbeds';
 
 /**
- * - Check if user has admin perms (might not be needed if I set the command to only be usable by admins anyways)
- * - Check if server already hsa a clan configured
- * - Check if the clan exists in the runemetrics
- * - Create the clan
+ * - Check if clan is already configured
+ * - Check if clan exists
+ * - Create clan
+ *
+ * @returns an object:
+ * success indicates if the clan was created
+ * isConfigured returns the clan data if it's already configured
+ * clan returns the clan data if it was successfully created
  */
-export async function handleSetupClan(interaction: ChatInputCommandInteraction) {
-  const isAdmin = await verifyAdminPermissions(interaction);
-  if (!isAdmin) return;
-
-  await interaction.deferReply();
-
-  const guildId = interaction.guildId;
-  const clanName = interaction.options.getString('clanname', true);
-
-  try {
-    const isClanAlreadyConfigured = await findClan(guildId);
-    if (isClanAlreadyConfigured) {
-      const { infoMessage } = embedClanAlreadyConfigured(isClanAlreadyConfigured);
-      await interaction.editReply({
-        embeds: [infoMessage],
-      });
-
-      return;
-    }
-
-    const isClanReal = await validateClanExists(clanName);
-    if (!isClanReal) {
-      return interaction.editReply({
-        content: `The clan **${clanName}** was not found. Please make sure you input a valid clan name.`,
-      });
-    }
-
-    const clan = await handleClanCreation(interaction, guildId);
-
-    const { successMessage } = embedClanSetupSuccess(clan);
-    await interaction.editReply({
-      embeds: [successMessage],
-    });
-  } catch (error) {
-    console.error('Error during clan setup:', error);
-
-    const { errorMessage } = embedClanSetupError();
-    await interaction.editReply({
-      embeds: [errorMessage],
-    });
+export async function setupNewClan(guildId: string, clanName: string) {
+  const isConfigured = await findClan(guildId);
+  if (isConfigured) {
+    return { success: false, isConfigured };
   }
+
+  const isReal = await validateClanExists(clanName);
+  if (!isReal) {
+    throw new Error('CLAN_NOT_FOUND');
+  }
+
+  const clan = await createClan(guildId, clanName);
+  return { success: true, clan };
 }
 
 // When a clan doesnt exist, it doesnt return an error, just a redirect to the ranking page. This function validades if the clans exists based on that
@@ -72,13 +41,4 @@ async function validateClanExists(clanName: string) {
 
   const lines = text.trim().split('\n');
   return lines.length > 1;
-}
-
-function handleClanCreation(
-  interaction: ChatInputCommandInteraction,
-  guildId: string,
-) {
-  const clanName = interaction.options.getString('clanname', true);
-
-  return createClan(guildId, clanName);
 }
