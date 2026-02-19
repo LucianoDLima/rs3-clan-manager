@@ -1,10 +1,19 @@
-import { ChatInputCommandInteraction, EmbedBuilder, MessageFlags } from 'discord.js';
-import { Clan } from '@prisma/client';
+import { ChatInputCommandInteraction } from 'discord.js';
 import { verifyAdminPermissions } from '../middleware/guard';
 import { createClan } from '../database/clan/createClan';
 import { findClan } from '../database/clan/findClan';
-import { embedCons } from '../constants/embeds';
+import {
+  embedClanAlreadyConfigured,
+  embedClanSetupError,
+  embedClanSetupSuccess,
+} from '../bot/embeds/setupEmbeds';
 
+/**
+ * - Check if user has admin perms (might not be needed if I set the command to only be usable by admins anyways)
+ * - Check if server already hsa a clan configured
+ * - Check if the clan exists in the runemetrics
+ * - Create the clan
+ */
 export async function handleSetupClan(interaction: ChatInputCommandInteraction) {
   const isAdmin = await verifyAdminPermissions(interaction);
   if (!isAdmin) return;
@@ -12,52 +21,57 @@ export async function handleSetupClan(interaction: ChatInputCommandInteraction) 
   await interaction.deferReply();
 
   const guildId = interaction.guildId;
-  if (!guildId) {
-    throw new Error("Interaction doesn't have a guild ID.");
-  }
+  const clanName = interaction.options.getString('clanname', true);
 
   try {
-    const existingClan = await findClan(guildId);
-    if (existingClan) {
+    const isClanAlreadyConfigured = await findClan(guildId);
+    if (isClanAlreadyConfigured) {
+      const { infoMessage } = embedClanAlreadyConfigured(isClanAlreadyConfigured);
       await interaction.editReply({
-        embeds: [
-          new EmbedBuilder()
-            .setDescription(
-              [
-                `This server is already set up with the clan: **${existingClan.name}**.`,
-                'If the clan name is incorrect, it will not be able to pull data from the runemetrics.',
-                '- You can change the clan name with the `/config rename` command.',
-                'Note that changing the clan name should only be done if you changed the clan name in-game and the current name is no longer correct, otherwise you might break the connection to runemetrics and it will stop pulling data.',
-              ].join('\n'),
-            )
-            .setColor(embedCons.color.INFO),
-        ],
+        embeds: [infoMessage],
       });
 
       return;
     }
 
+    const isClanReal = await validateClanExists(clanName);
+    if (!isClanReal) {
+      return interaction.editReply({
+        content: `The clan **${clanName}** was not found. Please make sure you input a valid clan name.`,
+      });
+    }
+
     const clan = await handleClanCreation(interaction, guildId);
 
-    const { successEmbed } = buildSuccessEmbed(clan);
-
+    const { successMessage } = embedClanSetupSuccess(clan);
     await interaction.editReply({
-      embeds: [successEmbed],
+      embeds: [successMessage],
     });
   } catch (error) {
     console.error('Error during clan setup:', error);
 
+    const { errorMessage } = embedClanSetupError();
     await interaction.editReply({
-      embeds: [
-        new EmbedBuilder()
-          .setDescription(
-            'Something went wrong while setting up the clan. Please report this error to the developer and include the timestamp shown below.',
-          )
-          .setColor(embedCons.color.ERROR)
-          .setTimestamp(new Date()),
-      ],
+      embeds: [errorMessage],
     });
   }
+}
+
+// When a clan doesnt exist, it doesnt return an error, just a redirect to the ranking page. This function validades if the clans exists based on that
+async function validateClanExists(clanName: string) {
+  const url = `https://secure.runescape.com/m=clan-hiscores/members_lite.ws?clanName=${encodeURIComponent(clanName)}`;
+
+  const response = await fetch(url);
+
+  const isRedirected = !response.url.includes('members_lite.ws');
+  if (isRedirected) return false;
+
+  const buffer = await response.arrayBuffer();
+  const decoder = new TextDecoder('iso-8859-1');
+  const text = decoder.decode(buffer);
+
+  const lines = text.trim().split('\n');
+  return lines.length > 1;
 }
 
 function handleClanCreation(
@@ -67,15 +81,4 @@ function handleClanCreation(
   const clanName = interaction.options.getString('clanname', true);
 
   return createClan(guildId, clanName);
-}
-
-function buildSuccessEmbed(clan: Clan) {
-  const embedDescription = [`Clan **${clan.name}** has been successfully created!`];
-
-  const successEmbed = new EmbedBuilder()
-    .setTitle('Clan created!')
-    .setDescription(embedDescription.join('\n'))
-    .setColor(embedCons.color.SUCCCESS);
-
-  return { successEmbed };
 }
