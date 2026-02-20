@@ -5,11 +5,6 @@ import { findClan } from '../database/clan/findClan';
  * - Check if clan is already configured
  * - Check if clan exists
  * - Create clan
- *
- * @returns an object:
- * success indicates if the clan was created
- * isConfigured returns the clan data if it's already configured
- * clan returns the clan data if it was successfully created
  */
 export async function setupNewClan(guildId: string, clanName: string) {
   const isConfigured = await findClan(guildId);

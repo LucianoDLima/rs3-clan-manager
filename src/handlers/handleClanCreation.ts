@@ -4,7 +4,9 @@ import {
   embedClanAlreadyConfigured,
   embedClanSetupError,
   embedClanSetupSuccess,
+  embedNoClanFound,
 } from '../bot/embeds/setupEmbeds';
+import { Clan } from '@prisma/client';
 
 export async function handleClanCreation(interaction: ChatInputCommandInteraction) {
   await interaction.deferReply();
@@ -28,11 +30,12 @@ export async function handleClanCreation(interaction: ChatInputCommandInteractio
         embeds: [successMessage],
       });
     }
-  } catch (error: any) {
+  } catch (error) {
     if (error.message === 'CLAN_NOT_FOUND') {
-      return interaction.editReply(
-        `The clan **${clanName}** was not found. Make sure you input the right name.`,
-      );
+      const { noClanFound } = embedNoClanFound({ name: clanName } as Clan);
+      return interaction.editReply({
+        embeds: [noClanFound],
+      });
     }
 
     console.error('Clan creation error:', error);

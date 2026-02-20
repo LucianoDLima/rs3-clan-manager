@@ -42,3 +42,17 @@ export function embedClanAlreadyConfigured(clan: Clan) {
 
   return { infoMessage };
 }
+
+export function embedNoClanFound(clan: Clan) {
+  const embedDescription = [
+    `The clan **${clan.name}** was not found.`,
+    'Please make sure the clan name is correct and try again.',
+  ];
+
+  const noClanFound = new EmbedBuilder()
+    .setTitle('No clan found')
+    .setDescription(embedDescription.join('\n'))
+    .setColor(embedCons.color.INFO)
+
+  return { noClanFound };
+}
