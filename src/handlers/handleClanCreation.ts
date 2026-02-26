@@ -5,7 +5,7 @@ import {
   embedClanSetupError,
   embedClanSetupSuccess,
   embedNoClanFound,
-} from '../bot/embeds/setupEmbeds';
+} from '../bot/embeds/configEmbeds';
 import { Clan } from '@prisma/client';
 
 export async function handleClanCreation(interaction: ChatInputCommandInteraction) {

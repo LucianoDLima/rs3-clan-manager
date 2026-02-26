@@ -1,6 +1,6 @@
 import { ChatInputCommandInteraction } from 'discord.js';
-import { handleSyncMembers } from '../../handlers/handleSyncMembers';
 import { handleClanCreation } from '../../handlers/handleClanCreation';
+import { handleSync } from '../../handlers/handleSync';
 
 export async function handleChatInputCommand(
   interaction: ChatInputCommandInteraction,
@@ -17,7 +17,7 @@ export async function handleChatInputCommand(
     }
 
     if (subcommand === 'sync') {
-      await handleSyncMembers(interaction);
+      await handleSync(interaction);
     }
   }
 }

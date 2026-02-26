@@ -3,24 +3,24 @@ import { Clan } from '@prisma/client';
 import { embedCons } from './_util';
 
 export function embedClanSetupSuccess(clan: Clan) {
-  const embedDescription = [`Clan **${clan.name}** has been successfully created!`];
+  const description = [`Clan **${clan.name}** has been successfully created!`];
 
   const successMessage = new EmbedBuilder()
     .setTitle('Clan created!')
-    .setDescription(embedDescription.join('\n'))
+    .setDescription(description.join('\n'))
     .setColor(embedCons.color.SUCCESS);
 
   return { successMessage };
 }
 
 export function embedClanSetupError() {
-  const embedDescription = [
+  const description = [
     'Something went wrong while setting up the clan. Please report this error to the developer and include the timestamp shown below.',
   ];
 
   const errorMessage = new EmbedBuilder()
     .setTitle('Error setting up clan')
-    .setDescription(embedDescription.join('\n'))
+    .setDescription(description.join('\n'))
     .setColor(embedCons.color.ERROR)
     .setTimestamp(new Date());
 
@@ -28,7 +28,7 @@ export function embedClanSetupError() {
 }
 
 export function embedClanAlreadyConfigured(clan: Clan) {
-  const embedDescription = [
+  const description = [
     `This server is already set up with the clan: **${clan.name}**.`,
     'If the clan name is incorrect, it will not be able to pull data from the runemetrics.',
     '- You can change the clan name with the `/config rename` command.',
@@ -37,22 +37,47 @@ export function embedClanAlreadyConfigured(clan: Clan) {
 
   const infoMessage = new EmbedBuilder()
     .setTitle('Clan has already been configured')
-    .setDescription(embedDescription.join('\n'))
+    .setDescription(description.join('\n'))
     .setColor(embedCons.color.INFO);
 
   return { infoMessage };
 }
 
 export function embedNoClanFound(clan: Clan) {
-  const embedDescription = [
+  const description = [
     `The clan **${clan.name}** was not found.`,
     'Please make sure the clan name is correct and try again.',
   ];
 
   const noClanFound = new EmbedBuilder()
     .setTitle('No clan found')
-    .setDescription(embedDescription.join('\n'))
-    .setColor(embedCons.color.INFO)
+    .setDescription(description.join('\n'))
+    .setColor(embedCons.color.INFO);
 
   return { noClanFound };
+}
+
+export function embedSyncReport(
+  totalActive: number,
+  added: number,
+  leavers: number,
+  rankChanges: number,
+) {
+  const description = [
+    `**${totalActive}** active members.\n`,
+    `**${added}** new member(s) added.`,
+    `**${leavers}** member(s) marked as inactive.`,
+    `**${rankChanges}** member(s) had rank changes.`,
+  ];
+
+  if (added === 0 && leavers === 0 && rankChanges === 0) {
+    description.push('\nNo changes detected since the last sync.');
+  }
+
+  const syncReport = new EmbedBuilder()
+    .setTitle('Clan Sync Complete')
+    .setDescription(description.join('\n'))
+    .setColor(embedCons.color.SUCCESS);
+
+  return { syncReport };
 }
