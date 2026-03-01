@@ -8,14 +8,16 @@ export async function syncClanData(clanId: number, clanName: string) {
 
   // Active members according to last sync
   const currentMembers = await findActiveMembers(clanId);
-  const currentMembersMap = new Map(currentMembers.map((m) => [m.name, m.rank]));
+  const currentMembersMap = new Map(
+    currentMembers.map((m) => [m.name, { rank: m.rank, currentExp: m.currentExp }]),
+  );
 
   // People who are currently active in `currentMembers` but arnt in `freshNames` have left the clan since last sync
   const leavers = currentMembers
     .filter((curMem) => curMem.isActive && !freshNames.has(curMem.name))
     .map((m) => m.name);
 
-  // No logic to differenciate new members from active ones cz skipduplicate on the query
+  // No logic to differenciate new members from active ones needed cz skipduplicate on the query
   const newMembers = freshMembers.map((m) => ({
     name: m.name,
     rank: m.rank,
@@ -25,13 +27,23 @@ export async function syncClanData(clanId: number, clanName: string) {
 
   const rankChanges = freshMembers
     .filter((fresh) => {
-      const oldRank = currentMembersMap.get(fresh.name);
-      return oldRank && oldRank !== fresh.rank;
+      const oldData = currentMembersMap.get(fresh.name);
+      return oldData && oldData.rank !== fresh.rank;
     })
     .map((fresh) => ({
       name: fresh.name,
-      oldRank: currentMembersMap.get(fresh.name)!,
+      oldRank: currentMembersMap.get(fresh.name)!.rank,
       newRank: fresh.rank,
+    }));
+
+  const expChanges = freshMembers
+    .filter((fresh) => {
+      const oldData = currentMembersMap.get(fresh.name);
+      return oldData && fresh.currentExp > oldData.currentExp;
+    })
+    .map((fresh) => ({
+      name: fresh.name,
+      newExp: fresh.currentExp,
     }));
 
   const syncedMembers = await executeMemberSync(
@@ -40,6 +52,7 @@ export async function syncClanData(clanId: number, clanName: string) {
     newMembers,
     [...freshNames],
     rankChanges,
+    expChanges,
   );
 
   return {

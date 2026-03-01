@@ -7,11 +7,22 @@ export async function executeMemberSync(
   freshMembers: Prisma.MemberCreateManyInput[],
   freshNames: string[],
   rankChanges: { name: string; newRank: string }[],
+  expChanges: { name: string; newExp: bigint }[],
 ) {
   const rankUpdateQueries = rankChanges.map((change) =>
     prisma.member.updateMany({
       where: { clanId, name: change.name },
       data: { rank: change.newRank },
+    }),
+  );
+
+  const expUpdateQueries = expChanges.map((change) =>
+    prisma.member.updateMany({
+      where: { clanId, name: change.name },
+      data: {
+        currentExp: change.newExp,
+        lastExpUpdate: new Date(),
+      },
     }),
   );
 
@@ -32,5 +43,7 @@ export async function executeMemberSync(
       where: { clanId, name: { in: freshNames }, isActive: false },
       data: { isActive: true, leftDate: null },
     }),
+
+    ...expUpdateQueries,
   ]);
 }
