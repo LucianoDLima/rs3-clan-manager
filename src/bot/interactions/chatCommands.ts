@@ -1,6 +1,7 @@
 import { ChatInputCommandInteraction } from 'discord.js';
 import { handleClanCreation } from '../../handlers/handleClanCreation';
 import { handleSync } from '../../handlers/handleSync';
+import { handleExceptionList } from '../../handlers/handleExceptionList';
 
 export async function handleChatInputCommand(
   interaction: ChatInputCommandInteraction,
@@ -12,12 +13,16 @@ export async function handleChatInputCommand(
       await handleClanCreation(interaction);
     }
 
-    if (subcommand === 'rename') {
-      await interaction.reply('To be implemented');
-    }
-
     if (subcommand === 'sync') {
       await handleSync(interaction);
+    }
+  }
+
+  if (interaction.commandName === 'list') {
+    const subcommand = interaction.options.getSubcommand();
+
+    if (subcommand === 'exceptions') {
+      await handleExceptionList(interaction);
     }
   }
 }
