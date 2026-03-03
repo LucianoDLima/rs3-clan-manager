@@ -4,7 +4,6 @@ export const commandList = [
   new SlashCommandBuilder()
     .setName('config')
     .setDescription('Manage your clan configuration')
-    .setDefaultMemberPermissions(PermissionsBitField.Flags.Administrator)
     .addSubcommand((subcommand) =>
       subcommand
         .setName('create')
@@ -32,5 +31,29 @@ export const commandList = [
       subcommand
         .setName('exceptions')
         .setDescription('Members on the exception list who are not to be kicked.'),
+    )
+    .addSubcommand((subcommand) =>
+      subcommand.setName('members').setDescription('List all current clan members.'),
+    )
+    .addSubcommand((subcommand) =>
+      subcommand
+        .setName('purge')
+        .setDescription('List members who are no longer in the clan'),
+    )
+    .addSubcommand((subcommand) =>
+      subcommand
+        .setName('inactive')
+        .setDescription('List members who have not been online for x days.')
+        .addIntegerOption((option) =>
+          option
+            .setName('daysinactive')
+            .setDescription('Number of days a member has been inactive.')
+            .setRequired(false),
+        ),
+    )
+    .addSubcommand((subcommand) =>
+      subcommand
+        .setName('invalid')
+        .setDescription('List members the bot could not find last time online.'),
     ),
 ];

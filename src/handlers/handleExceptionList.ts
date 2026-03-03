@@ -3,30 +3,41 @@ import { findExceptionMembers } from '../database/member/findMember';
 import { findClan } from '../database/clan/findClan';
 import { embedNoClanConfig } from '../bot/embeds/generalEmbeds';
 import { listExceptions } from '../services/listExceptions';
+import { generatePaginationButtons, handlePagination } from '../util/pagination';
 
 export async function handleExceptionList(interaction: ChatInputCommandInteraction) {
   await interaction.deferReply();
 
   try {
-    // TODO: Move to middleware too ill do it surely wont postpone every single commit
-    const clan = await findClan(interaction.guildId);
+    // TODO: MOVE TO middlware
+    const clan = await findClan(interaction.guildId!);
     if (!clan) {
       const { noClanConfig } = embedNoClanConfig();
-      await interaction.editReply({
-        embeds: [noClanConfig],
-      });
-
+      await interaction.editReply({ embeds: [noClanConfig] });
       return;
     }
 
-    const exceptions = await findExceptionMembers(clan.id);
-    const embed = listExceptions(exceptions);
+    const exceptionsData = await findExceptionMembers(clan.id);
+    const totalPages = Math.ceil(exceptionsData.length / 25) || 1;
+    const currentPage = 0;
 
-    await interaction.editReply({ embeds: [embed] });
+    const embedList = await interaction.editReply({
+      embeds: [listExceptions(exceptionsData, currentPage)],
+      components:
+        totalPages > 1 ? [generatePaginationButtons(currentPage, totalPages)] : [],
+    });
+
+    if (totalPages > 1) {
+      handlePagination(
+        interaction,
+        embedList,
+        exceptionsData,
+        totalPages,
+        listExceptions,
+      );
+    }
   } catch (error) {
     console.error(error);
-    await interaction.editReply(
-      'Failed to fetch exceptions. TODO: Add better error handling here.',
-    );
+    await interaction.editReply('Failed to fetch exceptions.');
   }
 }

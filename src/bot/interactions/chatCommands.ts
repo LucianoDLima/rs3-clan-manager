@@ -24,5 +24,17 @@ export async function handleChatInputCommand(
     if (subcommand === 'exceptions') {
       await handleExceptionList(interaction);
     }
+
+    if (subcommand === 'members') {
+    }
+
+    if (subcommand === 'purge') {
+    }
+
+    if (subcommand === 'inactive') {
+    }
+
+    if (subcommand === 'invalid') {
+    }
   }
 }
