@@ -3,6 +3,7 @@ import { findClan } from '../database/clan/findClan';
 import { embedNoClanConfig } from '../bot/embeds/generalEmbeds';
 import { syncClanData } from '../services/memberSync';
 import { embedSyncReport } from '../bot/embeds/configEmbeds';
+import { syncMissingLastOnline } from '../services/memberSyncNull';
 
 export async function handleSync(interaction: ChatInputCommandInteraction) {
   await interaction.deferReply();
@@ -17,6 +18,13 @@ export async function handleSync(interaction: ChatInputCommandInteraction) {
       });
 
       return;
+    }
+
+    //TODO: Need to work on it. Gotta make so it shows up on the embed that this is an ongoing process that will take a few mins.
+    // Also might need to make a way so it I cant run this command while this bit is syncing to prevent overload idk. need thinking
+    const lastActivity = interaction.options.getBoolean('activity');
+    if (lastActivity) {
+      syncMissingLastOnline(clan.id);
     }
 
     const report = await syncClanData(clan.id, clan.name);

@@ -1,6 +1,13 @@
 import { Clan, Prisma } from '@prisma/client';
 import prisma from '../../prisma/client.prisma';
 
+export async function updateLastActivity(memberId: number, lastActivity: Date) {
+  return await prisma.member.update({
+    where: { id: memberId },
+    data: { lastActivity },
+  });
+}
+
 export async function executeMemberSync(
   clanId: Clan['id'],
   leavers: string[],

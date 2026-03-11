@@ -1,4 +1,4 @@
-import { PermissionsBitField, SlashCommandBuilder } from 'discord.js';
+import { SlashCommandBuilder } from 'discord.js';
 
 export const commandList = [
   new SlashCommandBuilder()
@@ -20,8 +20,14 @@ export const commandList = [
     .addSubcommand((subcommand) =>
       subcommand
         .setName('sync')
-        .setDescription(
-          'Sync clan members with runemetrics. This does not remove members.',
+        .setDescription('Sync members through experience gained.')
+        .addBooleanOption((option) =>
+          option
+            .setName('activity')
+            .setDescription(
+              'Sync members who have not gained experience through last activity done.',
+            )
+            .setRequired(false),
         ),
     ),
   new SlashCommandBuilder()
@@ -33,17 +39,17 @@ export const commandList = [
         .setDescription('Members on the exception list who are not to be kicked.'),
     )
     .addSubcommand((subcommand) =>
-      subcommand.setName('members').setDescription('List all current clan members.'),
+      subcommand.setName('members').setDescription('All current clan members.'),
     )
     .addSubcommand((subcommand) =>
       subcommand
         .setName('purge')
-        .setDescription('List members who are no longer in the clan'),
+        .setDescription('Members who are no longer in the clan or name changed.'),
     )
     .addSubcommand((subcommand) =>
       subcommand
         .setName('inactive')
-        .setDescription('List members who have not been online for x days.')
+        .setDescription('Members who have not been online for x days.')
         .addIntegerOption((option) =>
           option
             .setName('daysinactive')

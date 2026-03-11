@@ -14,3 +14,18 @@ export async function findExceptionMembers(clanId: number) {
     select: { name: true, rank: true, lastExpUpdate: true },
   });
 }
+
+export async function findLastExpUpdateNull(clanId: number) {
+  const fifteenDaysAgo = new Date();
+  fifteenDaysAgo.setDate(fifteenDaysAgo.getDate() - 15);
+
+  return await prisma.member.findMany({
+    where: {
+      clanId,
+      isActive: true,
+      lastExpUpdate: null,
+      OR: [{ lastActivity: null }, { lastActivity: { lt: fifteenDaysAgo } }],
+    },
+    select: { id: true, name: true },
+  });
+}
