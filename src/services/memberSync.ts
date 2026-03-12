@@ -11,7 +11,11 @@ import { executeMemberSync } from '../database/member/updateMember';
  *
  * @param clanId - The database ID of the clan.
  * @param clanName - The exact name of the clan in RuneScape.
- * @returns An object containing a summary of the sync operation (counts for active, leavers, new, and rank changes).
+ * @returns An object containing:
+ * - `totalActiveNow`: The number of active members in the clan.
+ * - `leaversCount`: The number of members who left the clan since the last sync.
+ * - `newMembers`: The number of new members added to the database.
+ * - `rankChanges`: The number of members who had rank changes since the last sync.
  */
 export async function syncClanData(clanId: number, clanName: string) {
   const { freshMembersData, freshMembersName } = await fetchFreshMembers(clanName);
