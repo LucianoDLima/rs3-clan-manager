@@ -1,13 +1,13 @@
-import { ChatInputCommandInteraction } from 'discord.js';
+import { ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
 import { setupNewClan } from '../services/setupClan';
-import {
-  embedClanAlreadyConfigured,
-  embedClanSetupError,
-  embedClanSetupSuccess,
-  embedNoClanFound,
-} from '../bot/embeds/configEmbeds';
 import { Clan } from '@prisma/client';
+import { embedCons } from '../bot/embeds/_util';
 
+/**
+ * Handle the clan creation process
+ * - Validate if the clan is already configured for the guild (which is how the api is called for a discord server id)
+ * - Validate if the clan exists in the runemetrics hiscores
+ */
 export async function handleClanCreation(interaction: ChatInputCommandInteraction) {
   await interaction.deferReply();
 
@@ -15,33 +15,91 @@ export async function handleClanCreation(interaction: ChatInputCommandInteractio
   const clanName = interaction.options.getString('clanname', true);
 
   try {
-    const result = await setupNewClan(guildId, clanName);
+    const setupRes = await setupNewClan(guildId, clanName);
 
-    if (!result.success && result.isConfigured) {
-      const { infoMessage } = embedClanAlreadyConfigured(result.isConfigured);
+    if (!setupRes.success && setupRes.isConfigured) {
+      const msgIsConfigured = embedClanAlreadyConfigured(setupRes.isConfigured);
+
       await interaction.editReply({
-        embeds: [infoMessage],
+        embeds: [msgIsConfigured],
       });
     }
 
-    if (result.clan) {
-      const { successMessage } = embedClanSetupSuccess(result.clan);
+    if (setupRes.clan) {
+      const msgSuccess = embedClanSetupSuccess(setupRes.clan);
+
       await interaction.editReply({
-        embeds: [successMessage],
+        embeds: [msgSuccess],
       });
     }
   } catch (error) {
     if (error.message === 'CLAN_NOT_FOUND') {
-      const { noClanFound } = embedNoClanFound({ name: clanName } as Clan);
+      const msgNoClanFound = embedNoClanFound({ name: clanName } as Clan);
+
       return interaction.editReply({
-        embeds: [noClanFound],
+        embeds: [msgNoClanFound],
       });
     }
 
     console.error('Clan creation error:', error);
-    const { errorMessage } = embedClanSetupError();
+
+    const  msgError  = embedClanSetupError();
+
     await interaction.editReply({
-      embeds: [errorMessage],
+      embeds: [msgError],
     });
   }
+}
+
+function embedClanAlreadyConfigured(clan: Clan) {
+  const description = [
+    `This server is already set up with the clan: **${clan.name}**.`,
+    'If the clan name is incorrect, it will not be able to pull data from the runemetrics.',
+  ];
+
+  const embed = new EmbedBuilder()
+    .setTitle('Clan has already been configured')
+    .setDescription(description.join('\n'))
+    .setColor(embedCons.color.INFO);
+
+  return embed;
+}
+
+function embedClanSetupSuccess(clan: Clan) {
+  const description = [`Clan **${clan.name}** has been successfully created!`];
+
+  const embed = new EmbedBuilder()
+    .setTitle('Clan created!')
+    .setDescription(description.join('\n'))
+    .setColor(embedCons.color.SUCCESS);
+
+  return embed;
+}
+
+function embedNoClanFound(clan: Clan) {
+  const description = [
+    `The clan **${clan.name}** was not found.`,
+    'Please make sure the clan name is correct and try again.',
+  ];
+
+  const embed = new EmbedBuilder()
+    .setTitle('No clan found')
+    .setDescription(description.join('\n'))
+    .setColor(embedCons.color.INFO);
+
+  return embed;
+}
+
+function embedClanSetupError() {
+  const description = [
+    'Something went wrong while setting up the clan. Please report this error to the developer and include the timestamp shown below.',
+  ];
+
+  const embed = new EmbedBuilder()
+    .setTitle('Error setting up clan')
+    .setDescription(description.join('\n'))
+    .setColor(embedCons.color.ERROR)
+    .setTimestamp(new Date());
+
+  return  embed ;
 }

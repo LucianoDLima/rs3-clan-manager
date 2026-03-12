@@ -21,7 +21,9 @@ export async function setupNewClan(guildId: string, clanName: string) {
   return { success: true, clan };
 }
 
-// When a clan doesnt exist, it doesnt return an error, just a redirect to the ranking page. This function validades if the clans exists based on that
+/**
+ * When a clan doesnt exist, it doesnt return an error, just a redirect to the ranking page. This function validades if the clans exists based on that
+ */
 async function validateClanExists(clanName: string) {
   const url = `https://secure.runescape.com/m=clan-hiscores/members_lite.ws?clanName=${encodeURIComponent(clanName)}`;
 
