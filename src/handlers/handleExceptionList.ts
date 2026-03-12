@@ -1,21 +1,18 @@
 import { ChatInputCommandInteraction } from 'discord.js';
 import { findExceptionMembers } from '../database/member/findMember';
-import { findClan } from '../database/clan/findClan';
-import { embedNoClanConfig } from '../bot/embeds/generalEmbeds';
 import { listExceptions } from '../services/listExceptions';
 import { generatePaginationButtons, handlePagination } from '../util/pagination';
+import { verifyClanExist } from '../middleware/guard';
 
+/**
+ * Handle the rendering of the exception list in discord
+ */
 export async function handleExceptionList(interaction: ChatInputCommandInteraction) {
   await interaction.deferReply();
 
   try {
-    // TODO: MOVE TO middlware
-    const clan = await findClan(interaction.guildId!);
-    if (!clan) {
-      const { noClanConfig } = embedNoClanConfig();
-      await interaction.editReply({ embeds: [noClanConfig] });
-      return;
-    }
+    const clan = await verifyClanExist(interaction);
+    if (!clan) return;
 
     const exceptionsData = await findExceptionMembers(clan.id);
     const totalPages = Math.ceil(exceptionsData.length / 25) || 1;

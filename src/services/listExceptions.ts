@@ -7,6 +7,12 @@ type ExceptionMember = {
   lastExpUpdate: Date | null;
 };
 
+/**
+ * Render an embed with the list of exception members, paginated by 25 per page
+ *
+ * @param exceptions Array of exception members to render
+ * @param page Current page number (0-indexed)
+ */
 export function listExceptions(exceptions: ExceptionMember[], page: number) {
   const PAGE_SIZE = 25;
   const start = page * PAGE_SIZE;
