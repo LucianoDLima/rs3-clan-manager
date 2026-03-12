@@ -97,13 +97,17 @@ async function fetchCurrentMembers(clanId: number) {
   return { currentMembers, currentMembersMap };
 }
 
-type CurrentMember = {
+interface CurrentMember {
   name: string;
   isActive: boolean;
   rank: string;
   currentExp: bigint;
 };
-type FreshMember = { name: string; rank: string; currentExp: bigint };
+interface FreshMember {
+  name: string;
+  rank: string;
+  currentExp: bigint;
+}
 type MemberMap = Map<string, { rank: string; currentExp: bigint }>;
 
 /**
