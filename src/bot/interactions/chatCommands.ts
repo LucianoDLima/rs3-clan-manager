@@ -4,6 +4,8 @@ import { handleSync } from '../../handlers/handleSync';
 import { handleExceptionList } from '../../handlers/handleExceptionList';
 import { handleInactiveList } from '../../handlers/handleInactiveList';
 import { handleLeaverList } from '../../handlers/handleLeaverList';
+import { handleAddException } from '../../handlers/handleAddException';
+import { handleDeleteException } from '../../handlers/handleDeleteException';
 
 export async function handleChatInputCommand(
   interaction: ChatInputCommandInteraction,
@@ -39,6 +41,18 @@ export async function handleChatInputCommand(
     }
 
     if (subcommand === 'invalid') {
+    }
+  }
+
+  if (interaction.commandName === 'exception') {
+    const subcommand = interaction.options.getSubcommand();
+
+    if (subcommand === 'add') {
+      await handleAddException(interaction);
+    }
+
+    if (subcommand === 'delete') {
+      await handleDeleteException(interaction);
     }
   }
 }

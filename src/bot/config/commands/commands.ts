@@ -62,4 +62,29 @@ export const commandList = [
         .setName('invalid')
         .setDescription('List members the bot could not find last time online.'),
     ),
+  new SlashCommandBuilder()
+  .setName('exception')
+  .setDescription('Manage the clan exception list')
+  .addSubcommand((subcommand) =>
+    subcommand
+      .setName('add')
+      .setDescription('Add a member to the exception list')
+      .addStringOption((option) =>
+        option
+          .setName('name')
+          .setDescription('The exact in-game name of the member.')
+          .setRequired(true),
+      ),
+  )
+  .addSubcommand((subcommand) =>
+    subcommand
+      .setName('delete')
+      .setDescription('Remove a member from the exception list')
+      .addStringOption((option) =>
+        option
+          .setName('name')
+          .setDescription('The exact in-game name of the member.')
+          .setRequired(true),
+      ),
+  )
 ];

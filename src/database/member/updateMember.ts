@@ -8,6 +8,14 @@ export async function updateLastActivity(memberId: number, lastActivity: Date) {
   });
 }
 
+export async function updateException(clanId: number, member: string, isException) {
+  return await prisma.member.updateMany({
+    where: { clanId, name: member, isActive: true },
+    data: { isException: isException },
+  });
+}
+
+
 export async function executeMemberSync(
   clanId: Clan['id'],
   leavers: string[],

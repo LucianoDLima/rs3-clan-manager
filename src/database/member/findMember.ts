@@ -1,4 +1,3 @@
-import { Clan } from '@prisma/client';
 import prisma from '../../prisma/client.prisma';
 
 export async function findActiveMembers(clanId: number) {
@@ -6,6 +5,15 @@ export async function findActiveMembers(clanId: number) {
     where: { clanId, isActive: true },
     select: { name: true, isActive: true, rank: true, currentExp: true },
   });
+}
+
+export async function findMember(clanId: number, member: string){
+  const foundMember = await prisma.member.findFirst({
+    where: { clanId, name: member, isActive: true },
+    select: { name: true}
+  })
+
+  return foundMember;
 }
 
 export async function findExceptionMembers(clanId: number) {
