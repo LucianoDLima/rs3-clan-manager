@@ -11,7 +11,7 @@ export async function findActiveMembers(clanId: number) {
 export async function findExceptionMembers(clanId: number) {
   return await prisma.member.findMany({
     where: { clanId, isActive: true, isException: true },
-    select: { name: true, rank: true, lastExpUpdate: true },
+    select: { name: true, rank: true, lastExpUpdate: true, lastActivity: true },
   });
 }
 

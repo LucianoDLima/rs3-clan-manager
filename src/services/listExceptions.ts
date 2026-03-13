@@ -5,6 +5,7 @@ type ExceptionMember = {
   name: string;
   rank: string;
   lastExpUpdate: Date | null;
+  lastActivity: Date | null;
 };
 
 /**
@@ -43,8 +44,10 @@ export function listExceptions(exceptions: ExceptionMember[], page: number) {
   ];
 
   const rows = pageExceptions.map((m, index) => {
-    const daysAgo = m.lastExpUpdate
-      ? Math.floor((now - m.lastExpUpdate.getTime()) / msInDay).toString()
+    const targetDate = m.lastExpUpdate ?? m.lastActivity;
+
+    const daysAgo = targetDate
+      ? Math.floor((now - targetDate.getTime()) / msInDay).toString()
       : 'N/A';
 
     const id = (start + index + 1).toString().padStart(3, ' ');
