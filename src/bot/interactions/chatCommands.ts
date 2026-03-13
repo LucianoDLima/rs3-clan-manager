@@ -3,6 +3,7 @@ import { handleClanCreation } from '../../handlers/handleClanCreation';
 import { handleSync } from '../../handlers/handleSync';
 import { handleExceptionList } from '../../handlers/handleExceptionList';
 import { handleInactiveList } from '../../handlers/handleInactiveList';
+import { handleLeaverList } from '../../handlers/handleLeaverList';
 
 export async function handleChatInputCommand(
   interaction: ChatInputCommandInteraction,
@@ -30,6 +31,7 @@ export async function handleChatInputCommand(
     }
 
     if (subcommand === 'purge') {
+      await handleLeaverList(interaction);
     }
 
     if (subcommand === 'inactive') {
