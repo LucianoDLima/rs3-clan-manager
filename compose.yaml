@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:latest
+    image: postgres:17
     container_name: clanrs3-db
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
