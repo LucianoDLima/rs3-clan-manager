@@ -20,3 +20,22 @@ export async function addException(clanId: number, member: string) {
 
   return exceptionMember;
 }
+
+/**
+ * Remove a member from the exception list
+ *
+ * TODO:
+ * 1 - Make it not be case sensitive when searching for the member
+ *
+ * @param clanId - ID of the clan where the exception will be removed
+ * @param member - Name of the member that will be removed from the exception
+ */
+export async function deleteException(clanId: number, member: string) {
+  const exceptionMember = await findActiveMember(clanId, member);
+
+  if (!exceptionMember) return null;
+
+  await setExceptionStatus(clanId, member, false);
+
+  return exceptionMember;
+}

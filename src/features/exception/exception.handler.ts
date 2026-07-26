@@ -1,11 +1,17 @@
 import { ChatInputCommandInteraction } from 'discord.js';
 import { verifyClanExist } from '../../middleware/guard';
-import { addException } from './exception.service';
-import { exceptionAddedEmbed, memberNotFoundEmbed } from './exception.embeds';
+import { addException, deleteException } from './exception.service';
+import {
+  exceptionAddedEmbed,
+  exceptionRemovedEmbed,
+  activeMemberNotFoundEmbed,
+  exceptionMemberNotFoundEmbed,
+} from './exception.embeds';
 
-// Handle the Discord command to add a member to the clan's exception list.
-// TODO: 
-// 1 - Better explain what error was thrown when the command fails
+// TODO:
+// 1 - Better explain what error was thrown when the command fails. Since error will most likely be the same for all, probably just a generic error message
+
+// Handle the Discord command to add a member to the clan's exception list
 export async function handleAddException(interaction: ChatInputCommandInteraction) {
   await interaction.deferReply();
 
@@ -18,7 +24,7 @@ export async function handleAddException(interaction: ChatInputCommandInteractio
 
     if (!exceptionMember) {
       await interaction.editReply({
-        embeds: [memberNotFoundEmbed(memberName)],
+        embeds: [activeMemberNotFoundEmbed(memberName)],
       });
 
       return;
@@ -30,5 +36,35 @@ export async function handleAddException(interaction: ChatInputCommandInteractio
   } catch (error) {
     console.error(error);
     await interaction.editReply('An error occurred while adding the exception.');
+  }
+}
+
+// Handle the Discord command to remove a member from the clan's exception list
+export async function handleDeleteException(
+  interaction: ChatInputCommandInteraction,
+) {
+  await interaction.deferReply();
+
+  try {
+    const clan = await verifyClanExist(interaction);
+    if (!clan) return;
+
+    const memberName = interaction.options.getString('name', true);
+    const exceptionMember = await deleteException(clan.id, memberName);
+
+    if (!exceptionMember) {
+      await interaction.editReply({
+        embeds: [exceptionMemberNotFoundEmbed(memberName)],
+      });
+
+      return;
+    }
+
+    await interaction.editReply({
+      embeds: [exceptionRemovedEmbed(exceptionMember.name)],
+    });
+  } catch (error) {
+    console.error(error);
+    await interaction.editReply('An error occurred while removing the exception.');
   }
 }
