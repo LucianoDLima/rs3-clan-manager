@@ -1,0 +1,22 @@
+import { findActiveMember } from '../members/members.repository';
+import { setExceptionStatus } from './exception.repository';
+
+/**
+ * Add a member to the exception list
+ *
+ * TODO:
+ * 1 - Add a check to ensure that the member is not already in the exception list before adding them
+ * 2 - Make it not be case sensitive when searching for the member
+ *
+ * @param clanId - ID of the clan where the exception will be added
+ * @param member - Name of the member that will be added to the exception
+ */
+export async function addException(clanId: number, member: string) {
+  const exceptionMember = await findActiveMember(clanId, member);
+
+  if (!exceptionMember) return null;
+
+  await setExceptionStatus(clanId, member, true);
+
+  return exceptionMember;
+}

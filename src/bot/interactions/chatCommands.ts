@@ -4,8 +4,8 @@ import { handleSync } from '../../handlers/handleSync';
 import { handleExceptionList } from '../../handlers/handleExceptionList';
 import { handleInactiveList } from '../../handlers/handleInactiveList';
 import { handleLeaverList } from '../../handlers/handleLeaverList';
-import { handleAddException } from '../../handlers/handleAddException';
 import { handleDeleteException } from '../../handlers/handleDeleteException';
+import { handleAddException } from '../../features/exception/exception.handler';
 
 export async function handleChatInputCommand(
   interaction: ChatInputCommandInteraction,
