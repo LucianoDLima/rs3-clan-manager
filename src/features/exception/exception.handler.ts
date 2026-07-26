@@ -1,12 +1,14 @@
 import { ChatInputCommandInteraction } from 'discord.js';
 import { verifyClanExist } from '../../middleware/guard';
-import { addException, deleteException } from './exception.service';
+import { addException, deleteException, listExceptions } from './exception.service';
 import {
   exceptionAddedEmbed,
   exceptionRemovedEmbed,
   activeMemberNotFoundEmbed,
   exceptionMemberNotFoundEmbed,
+  exceptionListEmbed,
 } from './exception.embeds';
+import { generatePaginationButtons, handlePagination } from '../../util/pagination';
 
 // TODO:
 // 1 - Better explain what error was thrown when the command fails. Since error will most likely be the same for all, probably just a generic error message
@@ -66,5 +68,38 @@ export async function handleDeleteException(
   } catch (error) {
     console.error(error);
     await interaction.editReply('An error occurred while removing the exception.');
+  }
+}
+
+// Handle the Discord command to list all members in the clan's exception list
+export async function handleListExceptions(interaction: ChatInputCommandInteraction) {
+  await interaction.deferReply();
+
+  try {
+    const clan = await verifyClanExist(interaction);
+    if (!clan) return;
+
+    const exceptionsData = await listExceptions(clan.id);
+    const totalPages = Math.ceil(exceptionsData.length / 25) || 1;
+    const currentPage = 0;
+
+    const embedList = await interaction.editReply({
+      embeds: [exceptionListEmbed(exceptionsData, currentPage)],
+      components:
+        totalPages > 1 ? [generatePaginationButtons(currentPage, totalPages)] : [],
+    });
+
+    if (totalPages > 1) {
+      handlePagination(
+        interaction,
+        embedList,
+        exceptionsData,
+        totalPages,
+        exceptionListEmbed,
+      );
+    }
+  } catch (error) {
+    console.error(error);
+    await interaction.editReply('Failed to fetch exceptions.');
   }
 }

@@ -1,5 +1,5 @@
 import { findActiveMember } from '../members/members.repository';
-import { setExceptionStatus } from './exception.repository';
+import { findExceptionMembers, setExceptionStatus } from './exception.repository';
 
 /**
  * Add a member to the exception list
@@ -38,4 +38,9 @@ export async function deleteException(clanId: number, member: string) {
   await setExceptionStatus(clanId, member, false);
 
   return exceptionMember;
+}
+
+// Wrap that returns the members that are currently marked as exceptions
+export async function listExceptions(clanId: number) {
+  return await findExceptionMembers(clanId);
 }

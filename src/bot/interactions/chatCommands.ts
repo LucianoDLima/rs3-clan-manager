@@ -1,10 +1,13 @@
 import { ChatInputCommandInteraction } from 'discord.js';
 import { handleClanCreation } from '../../handlers/handleClanCreation';
 import { handleSync } from '../../handlers/handleSync';
-import { handleExceptionList } from '../../handlers/handleExceptionList';
 import { handleInactiveList } from '../../handlers/handleInactiveList';
 import { handleLeaverList } from '../../handlers/handleLeaverList';
-import { handleAddException, handleDeleteException } from '../../features/exception/exception.handler';
+import {
+  handleAddException,
+  handleDeleteException,
+  handleListExceptions,
+} from '../../features/exception/exception.handler';
 
 export async function handleChatInputCommand(
   interaction: ChatInputCommandInteraction,
@@ -25,7 +28,7 @@ export async function handleChatInputCommand(
     const subcommand = interaction.options.getSubcommand();
 
     if (subcommand === 'exceptions') {
-      await handleExceptionList(interaction);
+      await handleListExceptions(interaction);
     }
 
     if (subcommand === 'members') {

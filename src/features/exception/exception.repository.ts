@@ -10,3 +10,15 @@ export async function setExceptionStatus(
     data: { isException },
   });
 }
+
+export async function findExceptionMembers(clanId: number) {
+  return await prisma.member.findMany({
+    where: { clanId, isActive: true, isException: true },
+    select: {
+      name: true,
+      rank: true,
+      lastExpUpdate: true,
+      lastActivity: true,
+    },
+  });
+}

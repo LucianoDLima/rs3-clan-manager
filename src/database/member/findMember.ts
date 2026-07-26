@@ -16,13 +16,6 @@ export async function findMember(clanId: number, member: string){
   return foundMember;
 }
 
-export async function findExceptionMembers(clanId: number) {
-  return await prisma.member.findMany({
-    where: { clanId, isActive: true, isException: true },
-    select: { name: true, rank: true, lastExpUpdate: true, lastActivity: true },
-  });
-}
-
 export async function findLastExpUpdateNull(clanId: number, daysInactive = 30) {
   const activityDate = new Date();
   activityDate.setDate(activityDate.getDate() - daysInactive);
@@ -72,5 +65,5 @@ export async function findLeavers(clanId: number) {
     select: { name: true, rank: true, leftDate: true },
   });
 
-  return leavers; 
+  return leavers;
 }
