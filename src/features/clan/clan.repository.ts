@@ -9,3 +9,9 @@ export async function createClan(guildID: Clan['guildID'], name: string) {
     },
   });
 }
+
+export async function findClan(guildID: Clan['guildID']) {
+  return prisma.clan.findUnique({
+    where: { guildID },
+  });
+}
