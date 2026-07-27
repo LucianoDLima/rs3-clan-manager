@@ -1,8 +1,11 @@
 import { ChatInputCommandInteraction } from 'discord.js';
-import { findInactiveMembers } from '../database/member/findMember';
-import { generatePaginationButtons, handlePagination } from '../util/pagination';
-import { verifyClanExist } from '../middleware/guard';
-import { listInactives } from '../services/listInactives';
+import { verifyClanExist } from '../../../middleware/guard';
+import { findInactiveMembers } from '../members.repository';
+import { listInactives } from './inactives.service';
+import {
+  generatePaginationButtons,
+  handlePagination,
+} from '../../../util/pagination';
 
 /**
  * Handle the rendering of the inactive list in discord
@@ -16,7 +19,7 @@ export async function handleInactiveList(interaction: ChatInputCommandInteractio
 
     const daysInactive = interaction.options.getInteger('daysinactive');
 
-    const inactivesData = await findInactiveMembers(clan.id, daysInactive);
+    const inactivesData = await findInactiveMembers(clan.id, daysInactive || 30);
     const totalPages = Math.ceil(inactivesData.length / 25) || 1;
     const currentPage = 0;
 
