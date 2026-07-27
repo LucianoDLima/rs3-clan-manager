@@ -7,7 +7,7 @@ import {
   activeMemberNotFoundEmbed,
   exceptionMemberNotFoundEmbed,
   exceptionListEmbed,
-} from './exception.embeds';
+} from './exception.embed';
 import { generatePaginationButtons, handlePagination } from '../../util/pagination';
 
 // TODO:
