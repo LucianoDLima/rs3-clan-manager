@@ -1,5 +1,15 @@
-import { executeMemberSync, findActiveMembers, findLastExpUpdateNull, updateLastActivity } from './members.repository';
-import { ICurrentMember, IFreshMember, IRuneMetricsResponse, TMemberMap } from './members.type';
+import {
+  executeMemberSync,
+  findActiveMembers,
+  findLastExpUpdateNull,
+  updateLastActivity,
+} from '../members.repository';
+import {
+  ICurrentMember,
+  IFreshMember,
+  IRuneMetricsResponse,
+  TMemberMap,
+} from '../members.type';
 
 /**
  * Sync members data from a clan from RuneScape's hiscores with the local database.
@@ -104,7 +114,10 @@ async function fetchCurrentMembers(clanId: number) {
  * @param freshMembersName - A Set of all member names
  * @returns An object containing an array with the name of all members who left the clan.
  */
-function getLeavers(currentMembers: ICurrentMember[], freshMembersName: Set<string>) {
+function getLeavers(
+  currentMembers: ICurrentMember[],
+  freshMembersName: Set<string>,
+) {
   const leavers = currentMembers
     .filter((curMem) => curMem.isActive && !freshMembersName.has(curMem.name))
     .map((m) => m.name);

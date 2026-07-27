@@ -6,7 +6,7 @@ import {
   handleListExceptions,
 } from '../../features/exception/exception.handler';
 import { handleClanCreation } from '../../features/clan/clan.handler';
-import { handleSync } from '../../features/members/memberSync.handler';
+import { handleSync } from '../../features/members/sync/sync.handler';
 import { handleInactiveList } from '../../features/members/inactives/inactives.handler';
 
 export async function handleChatInputCommand(
