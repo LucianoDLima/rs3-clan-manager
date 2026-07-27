@@ -1,34 +1,12 @@
 import prisma from '../../prisma/client.prisma';
 
-export async function findActiveMembers(clanId: number) {
-  return await prisma.member.findMany({
-    where: { clanId, isActive: true },
-    select: { name: true, isActive: true, rank: true, currentExp: true },
-  });
-}
-
-export async function findMember(clanId: number, member: string){
+export async function findMember(clanId: number, member: string) {
   const foundMember = await prisma.member.findFirst({
     where: { clanId, name: member, isActive: true },
-    select: { name: true}
-  })
+    select: { name: true },
+  });
 
   return foundMember;
-}
-
-export async function findLastExpUpdateNull(clanId: number, daysInactive = 30) {
-  const activityDate = new Date();
-  activityDate.setDate(activityDate.getDate() - daysInactive);
-
-  return await prisma.member.findMany({
-    where: {
-      clanId,
-      isActive: true,
-      lastExpUpdate: null,
-      OR: [{ lastActivity: null }, { lastActivity: { lt: activityDate } }],
-    },
-    select: { id: true, name: true },
-  });
 }
 
 export async function findInactiveMembers(clanId: number, daysInactive = 30) {

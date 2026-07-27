@@ -1,5 +1,4 @@
 import { ChatInputCommandInteraction } from 'discord.js';
-import { handleSync } from '../../handlers/handleSync';
 import { handleInactiveList } from '../../handlers/handleInactiveList';
 import { handleLeaverList } from '../../handlers/handleLeaverList';
 import {
@@ -8,6 +7,7 @@ import {
   handleListExceptions,
 } from '../../features/exception/exception.handler';
 import { handleClanCreation } from '../../features/clan/clan.handler';
+import { handleSync } from '../../features/members/memberSync.handler';
 
 export async function handleChatInputCommand(
   interaction: ChatInputCommandInteraction,

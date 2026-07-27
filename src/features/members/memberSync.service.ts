@@ -1,5 +1,5 @@
-import { findActiveMembers } from '../database/member/findMember';
-import { executeMemberSync } from '../database/member/updateMember';
+import { executeMemberSync, findActiveMembers, findLastExpUpdateNull, updateLastActivity } from './members.repository';
+import { ICurrentMember, IFreshMember, IRuneMetricsResponse, TMemberMap } from './members.type';
 
 /**
  * Sync members data from a clan from RuneScape's hiscores with the local database.
@@ -97,19 +97,6 @@ async function fetchCurrentMembers(clanId: number) {
   return { currentMembers, currentMembersMap };
 }
 
-interface CurrentMember {
-  name: string;
-  isActive: boolean;
-  rank: string;
-  currentExp: bigint;
-};
-interface FreshMember {
-  name: string;
-  rank: string;
-  currentExp: bigint;
-}
-type MemberMap = Map<string, { rank: string; currentExp: bigint }>;
-
 /**
  * Find members who have left the clan by comparing the current active members in the database with the fresh members fetched from the hiscores
  *
@@ -117,7 +104,7 @@ type MemberMap = Map<string, { rank: string; currentExp: bigint }>;
  * @param freshMembersName - A Set of all member names
  * @returns An object containing an array with the name of all members who left the clan.
  */
-function getLeavers(currentMembers: CurrentMember[], freshMembersName: Set<string>) {
+function getLeavers(currentMembers: ICurrentMember[], freshMembersName: Set<string>) {
   const leavers = currentMembers
     .filter((curMem) => curMem.isActive && !freshMembersName.has(curMem.name))
     .map((m) => m.name);
@@ -134,7 +121,7 @@ function getLeavers(currentMembers: CurrentMember[], freshMembersName: Set<strin
  * @param clanId - The database ID of the clan.
  * @returns An array with the name of all new members to be added to the database.
  */
-function getNewMembers(freshMembersData: FreshMember[], clanId: number) {
+function getNewMembers(freshMembersData: IFreshMember[], clanId: number) {
   const newMembers = freshMembersData.map((m) => ({
     name: m.name,
     rank: m.rank,
@@ -153,8 +140,8 @@ function getNewMembers(freshMembersData: FreshMember[], clanId: number) {
  * @returns An array with the name of all members who had rank changes with their old and new ranks.
  */
 function getRankChanges(
-  freshMembersData: FreshMember[],
-  currentMembersData: MemberMap,
+  freshMembersData: IFreshMember[],
+  currentMembersData: TMemberMap,
 ) {
   const rankeChanges = freshMembersData
     .filter((fresh) => {
@@ -178,8 +165,8 @@ function getRankChanges(
  * @returns An array with the name and exp of all members who had experience changes.
  */
 function getExpChanges(
-  freshMembersData: FreshMember[],
-  currentMembersMap: MemberMap,
+  freshMembersData: IFreshMember[],
+  currentMembersMap: TMemberMap,
 ) {
   const expChanges = freshMembersData
     .filter((fresh) => {
@@ -192,4 +179,75 @@ function getExpChanges(
     }));
 
   return expChanges;
+}
+
+// ------------------------- Null lastExpUpdate sync -------------------------
+
+/**
+ * Sync members with null lastExpUpdate by fetching their profile and checking the last activity date.
+ *
+ * @param clanId - The ID of the clan
+ */
+export async function syncMissingLastOnline(clanId: number) {
+  const members = await findLastExpUpdateNull(clanId);
+
+  for (const member of members) {
+    await processMemberActivity(clanId, member);
+    // to try preventing 429 rate limit error
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+  }
+
+  console.log(`Done for ${clanId}`);
+}
+
+/**
+ * Fetch the member's profile to check the last activity date and update the database
+ *
+ * @param clanId - The ID of the clan
+ * @param member - An object containing the member's ID and name
+ */
+async function processMemberActivity(
+  clanId: number,
+  member: { id: number; name: string },
+) {
+  try {
+    const url = `https://apps.runescape.com/runemetrics/profile/profile?user=${encodeURIComponent(member.name)}`;
+    const res = await fetch(url);
+
+    if (!res.ok) {
+      console.warn(
+        `${clanId} - ${member.name} - Skip: Server returned ${res.status}`,
+      );
+
+      return;
+    }
+
+    const contentType = res.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      console.warn(
+        `${clanId} - ${member.name} - Skipped: Received HTML instead of JSON`,
+      );
+
+      return;
+    }
+
+    const data = (await res.json()) as IRuneMetricsResponse;
+
+    if (data.error === 'PROFILE_PRIVATE') {
+      // TODO: Add a row in the db to mark it as private maybe?
+      console.log(`${clanId} - ${member.name} - Skipped: Private Profile.`);
+
+      return;
+    }
+
+    if (data.activities?.length) {
+      const firstActivityDate = new Date(data.activities[0].date);
+      await updateLastActivity(member.id, firstActivityDate);
+      console.log(
+        `${clanId} - ${member.name} - Updated: ${firstActivityDate.toISOString()}`,
+      );
+    }
+  } catch (error) {
+    console.error(`${clanId} - ${member.name} - error:`, error);
+  }
 }
