@@ -4,7 +4,7 @@ import { IExceptionMember } from './list-exceptions.type';
 
 export function activeMemberNotFoundEmbed(memberName: string) {
   return new EmbedBuilder()
-    .setTitle('Member Not Found')
+    .setTitle('Member not found')
     .setDescription(
       `Could not find an active member named **${memberName}** in the clan.`,
     )
@@ -13,21 +13,21 @@ export function activeMemberNotFoundEmbed(memberName: string) {
 
 export function exceptionAddedEmbed(memberName: string) {
   return new EmbedBuilder()
-    .setTitle('Exception Added')
+    .setTitle('Member added')
     .setDescription(`**${memberName}** was added to the exception list.`)
     .setColor(embedCons.color.INFO);
 }
 
 export function exceptionMemberNotFoundEmbed(memberName: string) {
   return new EmbedBuilder()
-    .setTitle('Exception Not Found')
+    .setTitle('Member not found')
     .setDescription(`**${memberName}** is not in the exception list.`)
     .setColor(embedCons.color.INFO);
 }
 
 export function exceptionRemovedEmbed(memberName: string) {
   return new EmbedBuilder()
-    .setTitle('Exception Removed')
+    .setTitle('Member removed')
     .setDescription(`Removed **${memberName}** from the exception list.`)
     .setColor(embedCons.color.INFO);
 }
@@ -45,7 +45,7 @@ export function exceptionListEmbed(exceptions: IExceptionMember[], page: number)
 
   const noExceptions = exceptions.length === 0;
   if (noExceptions) {
-    return embed.setDescription('No members are currently marked as exceptions.');
+    return embed.setDescription('No members currently on the exception list.');
   }
 
   const now = Date.now();

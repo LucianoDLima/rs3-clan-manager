@@ -4,7 +4,8 @@ import { embedCons } from '../../shared/embeds/colors';
 export function clanIsConfiguredEmbed(clanName: string) {
   const description = [
     `This server is already set up with the clan: **${clanName}**.`,
-    'If the clan name is incorrect, it will not be able to pull data from the runemetrics.',
+    '',
+    'If the clan name is incorrect, it will not be able to pull data from the runemetrics. It is currently not possible to change the clan name once it has been set up. If you need to change the clan name, please contact the developer to reset the clan configuration for this server.',
   ];
 
   const embed = new EmbedBuilder()
@@ -40,16 +41,3 @@ export function clanNotFoundEmbed(clanName: string) {
   return embed;
 }
 
-export function clanSetupErrorEmbed() {
-  const description = [
-    'Something went wrong while setting up the clan. Please report this error to the developer and include the timestamp shown below.',
-  ];
-
-  const embed = new EmbedBuilder()
-    .setTitle('Error setting up clan')
-    .setDescription(description.join('\n'))
-    .setColor(embedCons.color.ERROR)
-    .setTimestamp(new Date());
-
-  return embed;
-}

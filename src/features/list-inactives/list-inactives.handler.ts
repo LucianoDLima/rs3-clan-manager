@@ -6,6 +6,7 @@ import {
   handlePagination,
 } from '../../shared/embeds/pagination';
 import { inactiveListEmbed } from './list-inactives.embed';
+import { errorRunningCommandEmbed } from '../../shared/embeds/general-message';
 
 /**
  * Handle the rendering of the inactive list in discord
@@ -40,6 +41,9 @@ export async function handleInactiveList(interaction: ChatInputCommandInteractio
     }
   } catch (error) {
     console.error(error);
-    await interaction.editReply('Failed to fetch inactive members.');
+
+    await interaction.editReply({
+      embeds: [errorRunningCommandEmbed('/list inactives')],
+    });
   }
 }

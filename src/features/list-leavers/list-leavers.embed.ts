@@ -26,8 +26,8 @@ export function leaversListEmbed(leavers: ILeavers[], page: number) {
   const header = [
     '```text',
     '╒═════╤══════════════╤══════════════╤══════════╕',
-    '│     │              │              │ Left     │',
-    '│  #  │ Name         │ Rank         │ x days   │',
+    '│     │              │              │ Left x   │',
+    '│  #  │ Name         │ Rank         │ days ago │',
     '├─────┼──────────────┼──────────────┼──────────┤',
   ];
 

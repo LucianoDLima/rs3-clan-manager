@@ -6,6 +6,7 @@ import {
 import { verifyClanExist } from '../../shared/command-checks/clan-validation';
 import { leaversListEmbed } from './list-leavers.embed';
 import { listLeavers } from './list-leavers.service';
+import { errorRunningCommandEmbed } from '../../shared/embeds/general-message';
 
 /**
  * Handle the rendering of the members marked as Inactive list in discord
@@ -38,6 +39,9 @@ export async function handleLeaverList(interaction: ChatInputCommandInteraction)
     }
   } catch (error) {
     console.error(error);
-    await interaction.editReply('Failed to fetch exceptions.');
+    
+    await interaction.editReply({
+      embeds: [errorRunningCommandEmbed('/list purge')],
+    });
   }
 }

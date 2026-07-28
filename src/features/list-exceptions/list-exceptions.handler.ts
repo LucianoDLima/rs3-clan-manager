@@ -16,6 +16,7 @@ import {
   generatePaginationButtons,
   handlePagination,
 } from '../../shared/embeds/pagination';
+import { errorRunningCommandEmbed } from '../../shared/embeds/general-message';
 
 // TODO:
 // 1 - Better explain what error was thrown when the command fails. Since error will most likely be the same for all, probably just a generic error message
@@ -109,6 +110,9 @@ export async function handleListExceptions(
     }
   } catch (error) {
     console.error(error);
-    await interaction.editReply('Failed to fetch exceptions.');
+
+    await interaction.editReply({
+      embeds: [errorRunningCommandEmbed('/list exceptions')],
+    });
   }
 }

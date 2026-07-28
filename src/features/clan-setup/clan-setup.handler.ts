@@ -3,9 +3,9 @@ import { setupNewClan } from './clan-setup.service';
 import {
   clanIsConfiguredEmbed,
   clanNotFoundEmbed,
-  clanSetupErrorEmbed,
   clanSetupSuccessEmbed,
 } from './clan-setup.embed';
+import { errorRunningCommandEmbed } from '../../shared/embeds/general-message';
 
 /**
  * Handle the clan creation process
@@ -46,7 +46,7 @@ export async function handleClanCreation(interaction: ChatInputCommandInteractio
     console.error('Clan creation error:', error);
 
     await interaction.editReply({
-      embeds: [clanSetupErrorEmbed()],
+      embeds: [errorRunningCommandEmbed('/config create')],
     });
   }
 }

@@ -1,7 +1,8 @@
-import { ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
+import { ChatInputCommandInteraction } from 'discord.js';
 import { verifyClanExist } from '../../shared/command-checks/clan-validation';
 import { syncClanData, syncMissingLastOnline } from './clan-sync.service';
-import { embedCons } from '../../shared/embeds/colors';
+import { syncReportEmbed } from './clan-sync.embed';
+import { errorRunningCommandEmbed } from '../../shared/embeds/general-message';
 
 /**
  * Handle the syncing of the clan members data with the runemetrics hiscores
@@ -22,7 +23,7 @@ export async function handleSync(interaction: ChatInputCommandInteraction) {
 
     const report = await syncClanData(clan.id, clan.name);
 
-    const { syncReport } = embedSyncReport(
+    const { syncReport } = syncReportEmbed(
       report.totalActiveNow,
       report.newMembers,
       report.leaversCount,
@@ -34,31 +35,9 @@ export async function handleSync(interaction: ChatInputCommandInteraction) {
     });
   } catch (error) {
     console.error(error);
-    await interaction.editReply('Failed to sync members.');
+
+    await interaction.editReply({
+      embeds: [errorRunningCommandEmbed('/config sync')],
+    });
   }
-}
-
-function embedSyncReport(
-  totalActive: number,
-  added: number,
-  leavers: number,
-  rankChanges: number,
-) {
-  const description = [
-    `**${totalActive}** active members.\n`,
-    `**${added}** new member(s) added.`,
-    `**${leavers}** member(s) marked as inactive.`,
-    `**${rankChanges}** member(s) had rank changes.`,
-  ];
-
-  if (added === 0 && leavers === 0 && rankChanges === 0) {
-    description.push('\nNo changes detected since the last sync.');
-  }
-
-  const syncReport = new EmbedBuilder()
-    .setTitle('Clan Sync Complete')
-    .setDescription(description.join('\n'))
-    .setColor(embedCons.color.SUCCESS);
-
-  return { syncReport };
 }
