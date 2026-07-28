@@ -1,6 +1,9 @@
 import { ChatInputCommandInteraction } from 'discord.js';
-import { generatePaginationButtons, handlePagination } from '../../util/pagination';
-import { verifyClanExist } from '../../middleware/guard';
+import {
+  generatePaginationButtons,
+  handlePagination,
+} from '../../shared/embeds/pagination';
+import { verifyClanExist } from '../../shared/command-checks/clan-validation';
 import { leaversListEmbed } from './list-leavers.embed';
 import { listLeavers } from './list-leavers.service';
 

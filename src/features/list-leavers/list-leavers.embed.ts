@@ -1,6 +1,6 @@
-import { EmbedBuilder } from "discord.js";
-import { ILeavers } from "./list-leavers.type";
-import { embedCons } from "../../bot/embeds/_util";
+import { EmbedBuilder } from 'discord.js';
+import { ILeavers } from './list-leavers.type';
+import { embedCons } from '../../shared/embeds/colors';
 
 export function leaversListEmbed(leavers: ILeavers[], page: number) {
   const PAGE_SIZE = 25;

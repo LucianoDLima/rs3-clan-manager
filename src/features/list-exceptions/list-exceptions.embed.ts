@@ -1,5 +1,5 @@
 import { EmbedBuilder } from 'discord.js';
-import { embedCons } from '../../bot/embeds/_util';
+import { embedCons } from '../../shared/embeds/colors';
 import { IExceptionMember } from './list-exceptions.type';
 
 export function activeMemberNotFoundEmbed(memberName: string) {

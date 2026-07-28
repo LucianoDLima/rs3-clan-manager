@@ -1,5 +1,5 @@
 import { EmbedBuilder } from 'discord.js';
-import { embedCons } from '../../bot/embeds/_util';
+import { embedCons } from '../../shared/embeds/colors';
 
 export function clanIsConfiguredEmbed(clanName: string) {
   const description = [

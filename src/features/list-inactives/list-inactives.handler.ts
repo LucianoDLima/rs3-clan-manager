@@ -1,7 +1,10 @@
 import { ChatInputCommandInteraction } from 'discord.js';
-import { verifyClanExist } from '../../middleware/guard';
+import { verifyClanExist } from '../../shared/command-checks/clan-validation';
 import { listInactives } from './list-inactives.service';
-import { generatePaginationButtons, handlePagination } from '../../util/pagination';
+import {
+  generatePaginationButtons,
+  handlePagination,
+} from '../../shared/embeds/pagination';
 import { inactiveListEmbed } from './list-inactives.embed';
 
 /**

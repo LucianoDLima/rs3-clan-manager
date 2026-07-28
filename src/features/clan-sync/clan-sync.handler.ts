@@ -1,7 +1,7 @@
 import { ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
-import { verifyClanExist } from '../../middleware/guard';
+import { verifyClanExist } from '../../shared/command-checks/clan-validation';
 import { syncClanData, syncMissingLastOnline } from './clan-sync.service';
-import { embedCons } from '../../bot/embeds/_util';
+import { embedCons } from '../../shared/embeds/colors';
 
 /**
  * Handle the syncing of the clan members data with the runemetrics hiscores

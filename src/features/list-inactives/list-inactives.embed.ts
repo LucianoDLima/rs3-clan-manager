@@ -1,6 +1,6 @@
 import { EmbedBuilder } from 'discord.js';
 import { IInactiveMember } from './list-inactives.type';
-import { embedCons } from '../../bot/embeds/_util';
+import { embedCons } from '../../shared/embeds/colors';
 
 // TODO:
 // 1 - Include the days inactive that the command was called with in the embed title e.g. "Inactive List (30 days)"

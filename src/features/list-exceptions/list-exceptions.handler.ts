@@ -1,6 +1,10 @@
 import { ChatInputCommandInteraction } from 'discord.js';
-import { verifyClanExist } from '../../middleware/guard';
-import { addException, deleteException, listExceptions } from './list-exceptions.service';
+import { verifyClanExist } from '../../shared/command-checks/clan-validation';
+import {
+  addException,
+  deleteException,
+  listExceptions,
+} from './list-exceptions.service';
 import {
   exceptionAddedEmbed,
   exceptionRemovedEmbed,
@@ -8,7 +12,10 @@ import {
   exceptionMemberNotFoundEmbed,
   exceptionListEmbed,
 } from './list-exceptions.embed';
-import { generatePaginationButtons, handlePagination } from '../../util/pagination';
+import {
+  generatePaginationButtons,
+  handlePagination,
+} from '../../shared/embeds/pagination';
 
 // TODO:
 // 1 - Better explain what error was thrown when the command fails. Since error will most likely be the same for all, probably just a generic error message
@@ -72,7 +79,9 @@ export async function handleDeleteException(
 }
 
 // Handle the Discord command to list all members in the clan's exception list
-export async function handleListExceptions(interaction: ChatInputCommandInteraction) {
+export async function handleListExceptions(
+  interaction: ChatInputCommandInteraction,
+) {
   await interaction.deferReply();
 
   try {
