@@ -1,4 +1,4 @@
-import { createClan, findClan } from './clan.repository';
+import { createClan, findClan } from './clan-setup.repository';
 
 /**
  * - Check if clan is already configured

@@ -1,13 +1,13 @@
 import { ChatInputCommandInteraction } from 'discord.js';
 import { verifyClanExist } from '../../middleware/guard';
-import { addException, deleteException, listExceptions } from './exception.service';
+import { addException, deleteException, listExceptions } from './list-exceptions.service';
 import {
   exceptionAddedEmbed,
   exceptionRemovedEmbed,
   activeMemberNotFoundEmbed,
   exceptionMemberNotFoundEmbed,
   exceptionListEmbed,
-} from './exception.embed';
+} from './list-exceptions.embed';
 import { generatePaginationButtons, handlePagination } from '../../util/pagination';
 
 // TODO:

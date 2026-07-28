@@ -1,21 +1,5 @@
-import { Clan, Prisma } from '@prisma/client';
 import prisma from '../../prisma/client.prisma';
-
-export async function findActiveMember(clanId: number, memberName: string) {
-  const foundMember = await prisma.member.findFirst({
-    where: { clanId, name: memberName, isActive: true },
-    select: { name: true },
-  });
-
-  return foundMember;
-}
-
-export async function findActiveMembers(clanId: number) {
-  return await prisma.member.findMany({
-    where: { clanId, isActive: true },
-    select: { name: true, isActive: true, rank: true, currentExp: true },
-  });
-}
+import { Clan, Prisma } from '@prisma/client';
 
 export async function executeMemberSync(
   clanId: Clan['id'],
@@ -86,30 +70,9 @@ export async function updateLastActivity(memberId: number, lastActivity: Date) {
   });
 }
 
-export async function findInactiveMembers(clanId: number, daysInactive = 30) {
-  const inactiveDaysAgo = new Date();
-  inactiveDaysAgo.setDate(inactiveDaysAgo.getDate() - daysInactive);
-
-  const members = await prisma.member.findMany({
-    where: {
-      clanId,
-      isActive: true,
-      isException: false,
-      OR: [
-        { lastExpUpdate: { lt: inactiveDaysAgo } },
-        { lastExpUpdate: null, lastActivity: { lt: inactiveDaysAgo } },
-      ],
-    },
+export async function findActiveMembers(clanId: number) {
+  return await prisma.member.findMany({
+    where: { clanId, isActive: true },
+    select: { name: true, isActive: true, rank: true, currentExp: true },
   });
-
-  const membersSorted = members.sort((a, b) => {
-    const dateA = a.lastExpUpdate ?? a.lastActivity;
-    const dateB = b.lastExpUpdate ?? b.lastActivity;
-
-    if (!dateA || !dateB) return 0;
-
-    return dateA.getTime() - dateB.getTime();
-  });
-
-  return membersSorted;
 }

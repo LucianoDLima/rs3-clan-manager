@@ -1,6 +1,6 @@
 import { EmbedBuilder } from 'discord.js';
 import { embedCons } from '../../bot/embeds/_util';
-import { IExceptionMember } from './exception.type';
+import { IExceptionMember } from './list-exceptions.type';
 
 export function activeMemberNotFoundEmbed(memberName: string) {
   return new EmbedBuilder()

@@ -1,15 +1,15 @@
 import {
-  executeMemberSync,
-  findActiveMembers,
-  findLastExpUpdateNull,
-  updateLastActivity,
-} from '../members.repository';
-import {
   ICurrentMember,
   IFreshMember,
   IRuneMetricsResponse,
   TMemberMap,
-} from '../members.type';
+} from './clan-sync.type';
+import {
+  executeMemberSync,
+  findActiveMembers,
+  findLastExpUpdateNull,
+  updateLastActivity,
+} from './clan-sync.repository';
 
 /**
  * Sync members data from a clan from RuneScape's hiscores with the local database.

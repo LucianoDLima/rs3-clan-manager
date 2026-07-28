@@ -1,33 +1,26 @@
 import { EmbedBuilder } from 'discord.js';
-import { embedCons } from '../bot/embeds/_util';
+import { IInactiveMember } from './list-inactives.type';
+import { embedCons } from '../../bot/embeds/_util';
 
-interface Leavers {
-  name: string;
-  rank: string;
-  leftDate: Date | null;
-};
-
-/**
- * Render an embed with the list of inactive members, paginated by 25 per page
- *
- * @param leavers Array of  members to render
- * @param page Current page number (0-indexed)
- */
-export function listLeavers(leavers: Leavers[], page: number) {
+// TODO:
+// 1 - Include the days inactive that the command was called with in the embed title e.g. "Inactive List (30 days)"
+export function inactiveListEmbed(inactives: IInactiveMember[], page: number) {
   const PAGE_SIZE = 25;
   const start = page * PAGE_SIZE;
-  const pageLeavers = leavers.slice(start, start + PAGE_SIZE);
-  const totalPages = Math.ceil(leavers.length / PAGE_SIZE) || 1;
+  const pageInactives = inactives.slice(start, start + PAGE_SIZE);
+  const totalPages = Math.ceil(inactives.length / PAGE_SIZE) || 1;
 
   const embed = new EmbedBuilder()
-    .setTitle(`List of members who left clan`)
+    .setTitle(`Inactive List`)
     .setColor(embedCons.color.INFO)
     .setFooter({
       text: `${page > 0 ? 'Page ' + (page + 1) + ' of ' + totalPages : ' '}`,
     });
 
-  if (leavers.length === 0) {
-    return embed.setDescription('No members have left the clan.');
+  if (inactives.length === 0) {
+    return embed.setDescription(
+      'No members have been inactive for the specified period.',
+    );
   }
 
   const now = Date.now();
@@ -37,19 +30,22 @@ export function listLeavers(leavers: Leavers[], page: number) {
   const header = [
     '```text',
     '╒═════╤══════════════╤══════════════╤══════════╕',
-    '│     │              │              │ Left     │',
-    '│  #  │ Name         │ Rank         │ x days   │',
+    '│     │              │              │ Last     │',
+    '│  #  │ Name         │ Rank         │ Online   │',
     '├─────┼──────────────┼──────────────┼──────────┤',
   ];
 
-  const rows = pageLeavers.map((m, index) => {
-    const daysAgo = m.leftDate
-      ? Math.floor((now - m.leftDate.getTime()) / msInDay).toString()
+  const rows = pageInactives.map((m, index) => {
+    const targetDate = m.lastExpUpdate ?? m.lastActivity;
+
+    const daysAgo = targetDate
+      ? Math.floor((now - targetDate.getTime()) / msInDay).toString()
       : 'N/A';
 
     const id = (start + index + 1).toString().padStart(3, ' ');
     const name = m.name.padEnd(12, ' ').substring(0, 12);
     const rank = m.rank.padEnd(12, ' ').substring(0, 12);
+
     const exp = daysAgo.padEnd(8, ' ').substring(0, 8);
 
     return `│ ${id} │ ${name} │ ${rank} │ ${exp} │`;

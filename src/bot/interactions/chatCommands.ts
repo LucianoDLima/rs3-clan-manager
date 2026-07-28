@@ -1,13 +1,13 @@
 import { ChatInputCommandInteraction } from 'discord.js';
-import { handleLeaverList } from '../../handlers/handleLeaverList';
+import { handleLeaverList } from '../../features/list-leavers/list-leavers.handler';
 import {
   handleAddException,
   handleDeleteException,
   handleListExceptions,
-} from '../../features/exception/exception.handler';
-import { handleClanCreation } from '../../features/clan/clan.handler';
-import { handleSync } from '../../features/members/sync/sync.handler';
-import { handleInactiveList } from '../../features/members/inactives/inactives.handler';
+} from '../../features/list-exceptions/list-exceptions.handler';
+import { handleClanCreation } from '../../features/clan-setup/clan-setup.handler';
+import { handleSync } from '../../features/clan-sync/clan-sync.handler';
+import { handleInactiveList } from '../../features/list-inactives/list-inactives.handler';
 
 export async function handleChatInputCommand(
   interaction: ChatInputCommandInteraction,

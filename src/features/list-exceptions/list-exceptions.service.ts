@@ -1,5 +1,8 @@
-import { findActiveMember } from '../members/members.repository';
-import { findExceptionMembers, setExceptionStatus } from './exception.repository';
+import {
+  findActiveMember,
+  findExceptionMembers,
+  setExceptionStatus,
+} from './list-exceptions.repository';
 
 /**
  * Add a member to the exception list

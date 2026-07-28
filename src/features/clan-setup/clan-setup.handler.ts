@@ -1,11 +1,11 @@
 import { ChatInputCommandInteraction } from 'discord.js';
-import { setupNewClan } from './clan.service';
+import { setupNewClan } from './clan-setup.service';
 import {
   clanIsConfiguredEmbed,
   clanNotFoundEmbed,
   clanSetupErrorEmbed,
   clanSetupSuccessEmbed,
-} from './clan.embed';
+} from './clan-setup.embed';
 
 /**
  * Handle the clan creation process
