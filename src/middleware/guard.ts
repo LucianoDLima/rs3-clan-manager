@@ -4,7 +4,7 @@ import {
   MessageFlags,
   PermissionsBitField,
 } from 'discord.js';
-import { findClan } from '../database/clan/findClan';
+import { findClan } from '../database/clan/find-clan';
 import { embedCons } from '../bot/embeds/_util';
 
 export async function verifyAdminPermissions(
