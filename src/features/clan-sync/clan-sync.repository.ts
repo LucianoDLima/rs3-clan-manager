@@ -31,7 +31,7 @@ export async function executeMemberSync(
   return await prisma.$transaction([
     prisma.member.updateMany({
       where: { clanId, name: { in: leavers } },
-      data: { isActive: false, leftDate: new Date(), currentExp: 0n },
+      data: { isActive: false, leftDate: new Date() },
     }),
 
     prisma.member.createMany({
@@ -43,7 +43,11 @@ export async function executeMemberSync(
 
     prisma.member.updateMany({
       where: { clanId, name: { in: freshNames }, isActive: false },
-      data: { isActive: true, leftDate: null },
+      data: {
+        isActive: true,
+        leftDate: null,
+        lastExpUpdate: new Date(),
+      },
     }),
 
     ...expUpdateQueries,
