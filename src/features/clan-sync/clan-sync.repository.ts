@@ -22,6 +22,8 @@ export async function executeMemberSync(
       data: {
         currentExp: change.newExp,
         lastExpUpdate: new Date(),
+        isActive: true,
+        leftDate: null,
       },
     }),
   );
