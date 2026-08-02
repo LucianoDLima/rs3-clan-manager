@@ -5,22 +5,27 @@ export async function executeMemberSync(
   clanId: Clan['id'],
   leavers: string[],
   freshMembers: Prisma.MemberCreateManyInput[],
-  freshNames: string[],
+  returners: string[],
   rankChanges: { name: string; newRank: string }[],
   expChanges: { name: string; newExp: bigint }[],
 ) {
-  const rankUpdateQueries = rankChanges.map((change) =>
+  const freshMemberData = freshMembers.map((member) => ({
+    ...member,
+    lastExpUpdate: new Date(),
+  }));
+
+  const rankUpdate = rankChanges.map((rank) =>
     prisma.member.updateMany({
-      where: { clanId, name: change.name },
-      data: { rank: change.newRank },
+      where: { clanId, name: rank.name },
+      data: { rank: rank.newRank },
     }),
   );
 
-  const expUpdateQueries = expChanges.map((change) =>
+  const expUpdate = expChanges.map((exp) =>
     prisma.member.updateMany({
-      where: { clanId, name: change.name },
+      where: { clanId, name: exp.name },
       data: {
-        currentExp: change.newExp,
+        currentExp: exp.newExp,
         lastExpUpdate: new Date(),
         isActive: true,
         leftDate: null,
@@ -29,20 +34,21 @@ export async function executeMemberSync(
   );
 
   return await prisma.$transaction([
+    // Mark leavers as inactive and set their leftDate
     prisma.member.updateMany({
       where: { clanId, name: { in: leavers } },
       data: { isActive: false, leftDate: new Date() },
     }),
 
+    // Add new members to the database, skipping duplicates
     prisma.member.createMany({
-      data: freshMembers,
+      data: freshMemberData,
       skipDuplicates: true,
     }),
 
-    ...rankUpdateQueries,
-
+    // Reactivate members who were previously marked as inactive but are now present in the fresh data
     prisma.member.updateMany({
-      where: { clanId, name: { in: freshNames }, isActive: false },
+      where: { clanId, name: { in: returners }, isActive: false },
       data: {
         isActive: true,
         leftDate: null,
@@ -50,7 +56,11 @@ export async function executeMemberSync(
       },
     }),
 
-    ...expUpdateQueries,
+    // Update the rank of members who have had rank changes
+    ...rankUpdate,
+
+    // Update the experience of members who have had experience changes and reset isActive and leftDate for those who were previously inactive
+    ...expUpdate,
   ]);
 }
 
