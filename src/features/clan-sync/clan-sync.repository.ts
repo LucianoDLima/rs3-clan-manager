@@ -14,19 +14,37 @@ export async function executeMemberSync(
     lastExpUpdate: new Date(),
   }));
 
-  const rankUpdate = rankChanges.map((rank) =>
-    prisma.member.updateMany({
-      where: { clanId, name: rank.name },
-      data: { rank: rank.newRank },
-    }),
-  );
+  const buildMemberUpdateMap = (
+    rankChanges: { name: string; newRank: string }[],
+    expChanges: { name: string; newExp: bigint }[],
+  ) => {
+    const updates = new Map<string, { rank?: string; currentExp?: bigint }>();
 
-  const expUpdate = expChanges.map((exp) =>
+    rankChanges.forEach(({ name, newRank }) => {
+      updates.set(name, {
+        ...(updates.get(name) || {}),
+        rank: newRank,
+      });
+    });
+
+    expChanges.forEach(({ name, newExp }) => {
+      updates.set(name, {
+        ...(updates.get(name) || {}),
+        currentExp: newExp,
+      });
+    });
+
+    return updates;
+  };
+
+  const memberUpdatesMap = buildMemberUpdateMap(rankChanges, expChanges);
+
+  const memberUpdates = Array.from(memberUpdatesMap.entries()).map(([name, data]) =>
     prisma.member.updateMany({
-      where: { clanId, name: exp.name },
+      where: { clanId, name },
       data: {
-        currentExp: exp.newExp,
-        lastExpUpdate: new Date(),
+        ...data,
+        lastExpUpdate: data.currentExp ? new Date() : undefined,
         isActive: true,
         leftDate: null,
       },
@@ -56,11 +74,8 @@ export async function executeMemberSync(
       },
     }),
 
-    // Update the rank of members who have had rank changes
-    ...rankUpdate,
-
-    // Update the experience of members who have had experience changes and reset isActive and leftDate for those who were previously inactive
-    ...expUpdate,
+    // Update the rank and exp of members who had changes, and set lastExpUpdate if exp changed
+    ...memberUpdates,
   ]);
 }
 
