@@ -1,6 +1,16 @@
 import prisma from '../../prisma/client.prisma';
 import { Clan, Prisma } from '@prisma/client';
 
+/**
+ * Synchronize clan member data between the database and the latest hiscores snapshot
+ *
+ * @param clanId - The ID of the clan to synchronize
+ * @param leavers - An array of member names who have left the clan
+ * @param freshMembers - An array of fresh member data fetched from the hiscores
+ * @param returners - An array of member names who have returned to the clan
+ * @param rankChanges - An array of objects containing the name and new rank of members who have changed ranks
+ * @param expChanges - An array of objects containing the name and new experience of members who have changed experience
+ */
 export async function executeMemberSync(
   clanId: Clan['id'],
   leavers: string[],
@@ -101,7 +111,7 @@ export async function updateLastActivity(memberId: number, lastActivity: Date) {
   });
 }
 
-export async function findActiveMembers(clanId: number) {
+export async function getActiveMembers(clanId: number) {
   return await prisma.member.findMany({
     where: { clanId, isActive: true },
     select: { name: true, isActive: true, rank: true, currentExp: true },
