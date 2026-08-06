@@ -1,4 +1,4 @@
-interface ICurrentMember {
+interface IActiveMember {
   name: string;
   isActive: boolean;
   rank: string;
@@ -20,4 +20,4 @@ interface IRuneMetricsResponse {
 
 type TMemberMap = Map<string, { rank: string; currentExp: bigint }>;
 
-export { ICurrentMember, IFreshMember, IRuneMetricsResponse, TMemberMap };
+export { IActiveMember, IFreshMember, IRuneMetricsResponse, TMemberMap };

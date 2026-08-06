@@ -1,12 +1,12 @@
 import {
-  ICurrentMember,
+  IActiveMember,
   IFreshMember,
   IRuneMetricsResponse,
   TMemberMap,
 } from './clan-sync.type';
 import {
   executeMemberSync,
-  findActiveMembers,
+  getActiveMembers,
   findLastExpUpdateNull,
   updateLastActivity,
 } from './clan-sync.repository';
@@ -28,25 +28,26 @@ import {
  * - `rankChanges`: The number of members who had rank changes since the last sync.
  */
 export async function syncClanData(clanId: number, clanName: string) {
-  const { freshMembersData, freshMembersName } = await fetchFreshMembers(clanName);
-  const { currentMembers, currentMembersMap } = await fetchCurrentMembers(clanId);
+  const { hiscoreMembersData, hiscoreMembersName } =
+    await fetchClanHiscoreMembers(clanName);
+  const { activeMembers, activeMembersMap } = await getClanMembersSnapshot(clanId);
 
-  const leavers = getLeavers(currentMembers, freshMembersName);
-  const newMembers = getNewMembers(freshMembersData, clanId);
-  const rankChanges = getRankChanges(freshMembersData, currentMembersMap);
-  const expChanges = getExpChanges(freshMembersData, currentMembersMap);
+  const leavers = getClanLeavers(activeMembers, hiscoreMembersName);
+  const newMembers = getNewMembers(hiscoreMembersData, clanId);
+  const rankChanges = getRankChanges(hiscoreMembersData, activeMembersMap);
+  const expChanges = getExpChanges(hiscoreMembersData, activeMembersMap);
 
   const syncedMembers = await executeMemberSync(
     clanId,
     leavers,
     newMembers,
-    [...freshMembersName],
+    [...hiscoreMembersName],
     rankChanges,
     expChanges,
   );
 
   return {
-    totalActiveNow: freshMembersData.length,
+    totalActiveNow: hiscoreMembersData.length,
     leaversCount: leavers.length,
     newMembers: syncedMembers[1].count,
     rankChanges: rankChanges.length,
@@ -54,17 +55,14 @@ export async function syncClanData(clanId: number, clanName: string) {
 }
 
 /**
- * Fetch the current members' data from the hiscores
- *
- * * Note: This function assumes the clan name is valid since it's not possible to create a clan that does not exist (validation in place on creation).
- * * Also, the RuneScape endpoint does not return standard HTTP errors for missing clans; it silently redirects to the global rankings page.
+ * Fetch the current members' from the clan in the hiscores
  *
  * @param clanName - The exact name of the clan
  * @returns An object containing:
- * - `freshMembersData`: An array of parsed data: name, rank and total exp
- * - `freshMembersName`: A Set of all member names that will be used for fast look up
+ * - `hiscoreMembersData`: An array of parsed data: name, rank and total exp
+ * - `hiscoreMembersName`: A Set of all member names to be used for fast look up
  */
-async function fetchFreshMembers(clanName: string) {
+async function fetchClanHiscoreMembers(clanName: string) {
   const url = `https://secure.runescape.com/m=clan-hiscores/members_lite.ws?clanName=${encodeURIComponent(clanName)}`;
 
   const response = await fetch(url);
@@ -75,7 +73,7 @@ async function fetchFreshMembers(clanName: string) {
 
   const lines = rawText.trim().split('\n');
 
-  const freshMembersData = lines.slice(1).map((line) => {
+  const hiscoreMembersData = lines.slice(1).map((line) => {
     const [name, rank, xp] = line.split(',');
 
     return {
@@ -85,41 +83,42 @@ async function fetchFreshMembers(clanName: string) {
     };
   });
 
-  const freshMembersName = new Set(freshMembersData.map((m) => m.name));
+  const hiscoreMembersName = new Set(hiscoreMembersData.map((m) => m.name));
 
-  return { freshMembersData, freshMembersName };
+  return { hiscoreMembersData, hiscoreMembersName };
 }
 
 /**
- * Fetch current active clan members from the database.
+ * Get a snapshot of the clan's current active members for comparison during sync.
  *
  * @param clanId - The ID of the clan
  * @returns An object containing:
- * - `currentMembers`: An array of the active members currently stored in the database.
- * - `currentMembersMap`: A Map keyed by member name, containing their rank and experience for fast lookups.
+ * - `activeMembers`: An array of the active members
+ * - `activeMembersMap`: A Map keyed by member name, containing their rank and experience for fast lookups
  */
-async function fetchCurrentMembers(clanId: number) {
-  const currentMembers = await findActiveMembers(clanId);
-  const currentMembersMap = new Map(
-    currentMembers.map((m) => [m.name, { rank: m.rank, currentExp: m.currentExp }]),
+async function getClanMembersSnapshot(clanId: number) {
+  const activeMembers = await getActiveMembers(clanId);
+
+  const activeMembersMap = new Map(
+    activeMembers.map((m) => [m.name, { rank: m.rank, currentExp: m.currentExp }]),
   );
 
-  return { currentMembers, currentMembersMap };
+  return { activeMembers, activeMembersMap };
 }
 
 /**
- * Find members who have left the clan by comparing the current active members in the database with the fresh members fetched from the hiscores
+ * Find members who are no longer in the latest hiscores data.
  *
- * @param currentMembers - An array of the active members currently stored in the database.
- * @param freshMembersName - A Set of all member names
+ * @param activeMembers - An array of the active members currently stored in the database
+ * @param freshMembersNames - A Set of the names of the members fetched from the hiscores
  * @returns An object containing an array with the name of all members who left the clan.
  */
-function getLeavers(
-  currentMembers: ICurrentMember[],
-  freshMembersName: Set<string>,
+function getClanLeavers(
+  activeMembers: IActiveMember[],
+  freshMembersNames: Set<string>,
 ) {
-  const leavers = currentMembers
-    .filter((curMem) => curMem.isActive && !freshMembersName.has(curMem.name))
+  const leavers = activeMembers
+    .filter((curMem) => curMem.isActive && !freshMembersNames.has(curMem.name))
     .map((m) => m.name);
 
   return leavers;
@@ -130,12 +129,12 @@ function getLeavers(
  *
  * * Note: Skipduplicate on the query already handles duplication of new members from active members
  *
- * @param freshMembersData - An array of parsed data: name, rank and total exp
+ * @param clanHiscoreMembersData - An array of parsed data: name, rank and total exp
  * @param clanId - The database ID of the clan.
  * @returns An array with the name of all new members to be added to the database.
  */
-function getNewMembers(freshMembersData: IFreshMember[], clanId: number) {
-  const newMembers = freshMembersData.map((m) => ({
+function getNewMembers(clanHiscoreMembersData: IFreshMember[], clanId: number) {
+  const newMembers = clanHiscoreMembersData.map((m) => ({
     name: m.name,
     rank: m.rank,
     clanId: clanId,
@@ -146,17 +145,17 @@ function getNewMembers(freshMembersData: IFreshMember[], clanId: number) {
 }
 
 /**
- * Find members who had rank changes by comparing the fresh members fetched from the hiscores with the current active members in the database.
+ * Find members whose rank changed by comparing hiscores data with the current database snapshot
  *
- * @param freshMembersData - An array of parsed data: name, rank and total exp
- * @param currentMembersData - A Map keyed by member name, containing their rank and experience for fast lookups.
- * @returns An array with the name of all members who had rank changes with their old and new ranks.
+ * @param clanHiscoreMembersData - Parsed hiscores data (name, rank, exp)
+ * @param currentMembersData - Map keyed by member name containing current rank and experience
+ * @returns An array of members with their old and new ranks
  */
 function getRankChanges(
-  freshMembersData: IFreshMember[],
+  clanHiscoreMembersData: IFreshMember[],
   currentMembersData: TMemberMap,
 ) {
-  const rankeChanges = freshMembersData
+  const rankChanges = clanHiscoreMembersData
     .filter((fresh) => {
       const oldData = currentMembersData.get(fresh.name);
       return oldData && oldData.rank !== fresh.rank;
@@ -167,21 +166,21 @@ function getRankChanges(
       newRank: fresh.rank,
     }));
 
-  return rankeChanges;
+  return rankChanges;
 }
 
 /**
- * Find members who had experience changes by comparing the fresh members fetched from the hiscores with the current active members in the database.
+ * Find members whose experience increased by comparing hiscores data with the current database snapshot
  *
- * @param freshMembersData - An array of parsed data: name, rank and total exp
- * @param currentMembersData - A Map keyed by member name, containing their rank and experience for fast lookups.
- * @returns An array with the name and exp of all members who had experience changes.
+ * @param clanHiscoreMembersData - Parsed hiscores data (name, rank, exp)
+ * @param currentMembersMap - Map keyed by member name containing current rank and experience
+ * @returns An array of members with their updated experience
  */
 function getExpChanges(
-  freshMembersData: IFreshMember[],
+  clanHiscoreMembersData: IFreshMember[],
   currentMembersMap: TMemberMap,
 ) {
-  const expChanges = freshMembersData
+  const expChanges = clanHiscoreMembersData
     .filter((fresh) => {
       const oldData = currentMembersMap.get(fresh.name);
       return oldData && fresh.currentExp > oldData.currentExp;
