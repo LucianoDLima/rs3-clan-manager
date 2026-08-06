@@ -1,6 +1,6 @@
-import { ChatInputCommandInteraction } from 'discord.js';
+import { AttachmentBuilder, ChatInputCommandInteraction } from 'discord.js';
 import { verifyClanExist } from '../../shared/command-checks/clan-validation';
-import { listInactives } from './list-inactives.service';
+import { buildInactiveListText, listInactives } from './list-inactives.service';
 import {
   generatePaginationButtons,
   handlePagination,
@@ -28,6 +28,18 @@ export async function handleInactiveList(interaction: ChatInputCommandInteractio
       embeds: [inactiveListEmbed(inactivesData, currentPage)],
       components:
         totalPages > 1 ? [generatePaginationButtons(currentPage, totalPages)] : [],
+    });
+
+    const fileContent = buildInactiveListText(inactivesData);
+
+    const file = new AttachmentBuilder(Buffer.from(fileContent, 'utf-8'), {
+      name: 'inactive_members.txt',
+    });
+
+    await interaction.followUp({
+      content: `Members inactive for ${daysInactive || 30} days or more:`,
+      files: [file],
+      ephemeral: true,
     });
 
     if (totalPages > 1) {
