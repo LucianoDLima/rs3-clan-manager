@@ -6,15 +6,17 @@ export function syncReportEmbed(
   added: number,
   leavers: number,
   rankChanges: number,
+  expChanges: number,
 ) {
   const description = [
-    `**${totalActive}** active members.\n`,
+    `**${totalActive}** members.\n`,
+    `**${expChanges}** member(s) confirmed active via experience gain.`,
     `**${added}** new member(s) added.`,
-    `**${leavers}** member(s) marked as inactive.`,
     `**${rankChanges}** member(s) had rank changes.`,
+    `**${leavers}** member(s) marked as inactive.`,
   ];
 
-  if (added === 0 && leavers === 0 && rankChanges === 0) {
+  if (added === 0 && leavers === 0 && rankChanges === 0 && expChanges === 0) {
     description.push('\nNo changes detected since the last sync.');
   }
 

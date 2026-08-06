@@ -26,6 +26,7 @@ import {
  * - `leaversCount`: The number of members who left the clan since the last sync.
  * - `newMembers`: The number of new members added to the database.
  * - `rankChanges`: The number of members who had rank changes since the last sync.
+ * - `expChanges`: The number of members who had experience changes since the last sync.
  */
 export async function syncClanData(clanId: number, clanName: string) {
   const { hiscoreMembersData, hiscoreMembersName } =
@@ -46,11 +47,14 @@ export async function syncClanData(clanId: number, clanName: string) {
     expChanges,
   );
 
+  console.log(expChanges);
+
   return {
     totalActiveNow: hiscoreMembersData.length,
     leaversCount: leavers.length,
     newMembers: syncedMembers[1].count,
     rankChanges: rankChanges.length,
+    expChanges: expChanges.length,
   };
 }
 

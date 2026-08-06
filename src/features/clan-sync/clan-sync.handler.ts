@@ -28,6 +28,7 @@ export async function handleSync(interaction: ChatInputCommandInteraction) {
       report.newMembers,
       report.leaversCount,
       report.rankChanges,
+      report.expChanges,
     );
 
     await interaction.editReply({
