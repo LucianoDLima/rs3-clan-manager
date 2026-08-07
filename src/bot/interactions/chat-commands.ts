@@ -12,15 +12,23 @@ import { handleInactiveList } from '../../features/list-inactives/list-inactives
 export async function handleChatInputCommand(
   interaction: ChatInputCommandInteraction,
 ) {
-  if (interaction.commandName === 'config') {
+  if (interaction.commandName === 'clan') {
     const subcommand = interaction.options.getSubcommand();
 
     if (subcommand === 'create') {
       await handleClanCreation(interaction);
     }
+  }
 
-    if (subcommand === 'sync') {
+  if (interaction.commandName === 'sync') {
+    const subcommand = interaction.options.getSubcommand();
+
+    if (subcommand === 'exp') {
       await handleSync(interaction);
+    }
+
+    if (subcommand === 'activity') {
+      // handleSyncByActivity(interaction); TODO
     }
   }
 
@@ -34,7 +42,7 @@ export async function handleChatInputCommand(
     if (subcommand === 'members') {
     }
 
-    if (subcommand === 'purge') {
+    if (subcommand === 'leavers') {
       await handleLeaverList(interaction);
     }
 
