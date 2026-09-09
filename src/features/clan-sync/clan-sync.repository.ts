@@ -89,27 +89,6 @@ export async function executeMemberSync(
   ]);
 }
 
-export async function findLastExpUpdateNull(clanId: number, daysInactive = 30) {
-  const activityDate = new Date();
-  activityDate.setDate(activityDate.getDate() - daysInactive);
-
-  return await prisma.member.findMany({
-    where: {
-      clanId,
-      isActive: true,
-      lastExpUpdate: null,
-      OR: [{ lastActivity: null }, { lastActivity: { lt: activityDate } }],
-    },
-    select: { id: true, name: true },
-  });
-}
-
-export async function updateLastActivity(memberId: number, lastActivity: Date) {
-  return await prisma.member.update({
-    where: { id: memberId },
-    data: { lastActivity },
-  });
-}
 
 export async function getActiveMembers(clanId: number) {
   return await prisma.member.findMany({

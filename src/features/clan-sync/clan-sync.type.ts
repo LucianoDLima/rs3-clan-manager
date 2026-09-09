@@ -11,13 +11,6 @@ interface IFreshMember {
   currentExp: bigint;
 }
 
-interface IRuneMetricsResponse {
-  error?: string;
-  activities?: {
-    date: string;
-  }[];
-}
-
 type TMemberMap = Map<string, { rank: string; currentExp: bigint }>;
 
-export { IActiveMember, IFreshMember, IRuneMetricsResponse, TMemberMap };
+export { IActiveMember, IFreshMember, TMemberMap };
