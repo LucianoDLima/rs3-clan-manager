@@ -1,6 +1,6 @@
 import { ChatInputCommandInteraction } from 'discord.js';
 import { verifyClanExist } from '../../shared/command-checks/clan-validation';
-import { syncClanData, syncMissingLastOnline } from './clan-sync.service';
+import { syncClanData } from './clan-sync.service';
 import { syncReportEmbed } from './clan-sync.embed';
 import { errorRunningCommandEmbed } from '../../shared/embeds/general-message';
 
@@ -13,13 +13,6 @@ export async function handleSync(interaction: ChatInputCommandInteraction) {
   try {
     const clan = await verifyClanExist(interaction);
     if (!clan) return;
-
-    //TODO: Need to work on it. Gotta make so it shows up on the embed that this is an ongoing process that will take a few mins.
-    // Also might need to make a way so it I cant run this command while this bit is syncing to prevent overload idk. need thinking
-    // const lastActivity = interaction.options.getBoolean('activity');
-    // if (lastActivity) {
-    //   syncMissingLastOnline(clan.id);
-    // }
 
     const report = await syncClanData(clan.id, clan.name);
 

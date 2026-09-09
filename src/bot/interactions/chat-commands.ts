@@ -8,6 +8,7 @@ import {
 import { handleClanCreation } from '../../features/clan-setup/clan-setup.handler';
 import { handleSync } from '../../features/clan-sync/clan-sync.handler';
 import { handleInactiveList } from '../../features/list-inactives/list-inactives.handler';
+import { handleSyncActivity } from '../../features/sync-activity/sync-activity.handler';
 
 export async function handleChatInputCommand(
   interaction: ChatInputCommandInteraction,
@@ -28,7 +29,7 @@ export async function handleChatInputCommand(
     }
 
     if (subcommand === 'activity') {
-      // handleSyncByActivity(interaction); TODO
+      await handleSyncActivity(interaction);
     }
   }
 
